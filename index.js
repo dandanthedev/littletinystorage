@@ -1,10 +1,23 @@
 require('dotenv').config();
+const fs = require('fs');
 
-if (!process.env.HEYA) return console.error("Please downoad/rename .env.example to .env and fill in the required variables");
+if (!process.env.HEYA) {
+    if (!fs.existsSync("./.env.example")) {
+        console.log("Downloading .env.example...");
+        const https = require('https');
+        https.get('https://raw.githubusercontent.com/dandanthedev/littletinystorage/main/.env.example', function (response) {
+            const file = fs.createWriteStream("./.env.example");
+            response.pipe(file);
+            file.on('finish', function () {
+                console.log(".env.example downloaded, please fill in the required variables and rename it to .env");
+            });
+        });
+    } else
+        return console.error("Please rename .env.example to .env and fill in the required variables");
+}
 
 
 const http = require('http');
-const fs = require('fs');
 const path = require('path');
 
 const { handleAPIRequest } = require('./api');
