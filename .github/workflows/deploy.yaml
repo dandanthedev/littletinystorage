@@ -7,6 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
       - uses: actions/checkout@v2
       - name: Install Dependencies
         run: bun install
