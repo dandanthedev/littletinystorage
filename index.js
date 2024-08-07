@@ -1,5 +1,4 @@
 require('dotenv').config();
-const ora = require('ora-classic');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -149,7 +148,6 @@ const requestListener = async function (req, res) {
     }
 }
 
-const spinner = ora('Loading...').start();
 
 if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir);
@@ -178,4 +176,4 @@ if (process.env.DELETE_BUCKETS_WHEN_ENV_REMOVED === "true") {
 
 
 http.createServer(requestListener).listen(port);
-spinner.succeed("Server running on port " + port);
+console.log("Server running on port " + port);
