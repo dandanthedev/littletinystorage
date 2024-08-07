@@ -8,6 +8,8 @@ jobs:
     steps:
       - uses: oven-sh/setup-bun@v2
       - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: bun install
       - name: Build
         run: bun run build
       #upload all files in the out directory to the github release
