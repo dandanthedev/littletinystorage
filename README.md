@@ -20,6 +20,11 @@ A little tiny file storage server, for the people that use S3 when they really d
 
 ## Setup
 
+The easiest way to get started is downloading the latest release from the [releases page](https://github.com/dandanthedev/LittleTinyStorage/releases).
+You will still need to fill in the .env file! (see below)
+
+If you want to build it yourself, follow these steps:
+
 1. Clone the repository
 2. Rename the .env.example file to .env
 3. Fill in the .env file with your own settings

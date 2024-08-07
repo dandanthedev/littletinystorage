@@ -1,16 +1,23 @@
 const fs = require('fs');
 const path = require('path');
 
-const apiRoutes = fs.readdirSync('./api');
+const checkToken = require('./checkToken');
+const generateToken = require('./generateToken');
+const hello = require('./hello');
 
-const routes = apiRoutes.map(route => {
-    if (route === "index.js") return;
-    console.log(`Loading ${route}`);
-    return {
-        path: route.split('.')[0],
-        handler: require(`./${route}`).handle
-    }
-}).filter(route => route);
+const routes = [{
+    path: 'checkToken',
+    handler: checkToken.handle
+},
+{
+    path: 'generateToken',
+    handler: generateToken.handle
+},
+{
+    path: 'hello',
+    handler: hello.handle
+}]
+
 
 async function handleAPIRequest(req, res, params, resp, env) {
     const buckets = env.buckets;

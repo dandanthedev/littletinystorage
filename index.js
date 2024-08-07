@@ -1,4 +1,8 @@
 require('dotenv').config();
+
+if (!process.env.HEYA) return console.error("Please downoad/rename .env.example to .env and fill in the required variables");
+
+
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
@@ -6,12 +10,23 @@ const path = require('path');
 const { handleAPIRequest } = require('./api');
 const { verifyToken } = require('./jwt');
 
-const buckets = process.env.BUCKETS.split(',');
+const buckets = process.env.BUCKETS?.split(',') ?? [];
 const dataDir = process.env.DATA_DIR || './data';
 
 const port = process.env.PORT ?? 7999;
 
-const directoryTemplate = fs.readFileSync('./directory.html', 'utf8');
+//TODO: find a better way to do this + make it editable by user
+const directoryTemplate = `
+    <title>Little Tiny Storage</title>
+
+<h1>{{bucket}}</h1>
+<ul>
+  {#file}
+  <li><a href="/{{bucket}}/{{file}}">{{file}}</a></li>
+  {/file}
+</ul>
+
+`;
 
 function resp(res, status, body, type) {
     if (type) {

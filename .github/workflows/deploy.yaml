@@ -1,0 +1,21 @@
+name: Build + Deploy to GitHub Releases
+
+on:
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v2
+      - name: Build
+        run: bun run build
+      #upload all files in the out directory to the github release
+      - name: Upload to Github Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: out/*
+          fail_on_unmatched_files: true
+          draft: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
