@@ -179,6 +179,9 @@ export const requestListener = async function (
       if (newBucket && process.env.MOVING_ACROSS_BUCKETS !== "true")
         return resp(res, 400, "Moving files across buckets is disabled");
 
+      if (newBucket && !buckets.includes(newBucket))
+        return resp(res, 400, "Invalid destination bucket");
+
       const nameToSet = newName ?? file;
       const bucketToSet = newBucket ?? bucket;
 
