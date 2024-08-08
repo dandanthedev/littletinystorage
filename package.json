@@ -1,17 +1,24 @@
 {
   "name": "littletinystorage",
   "author": "dandandev",
+  "type": "module",
   "dependencies": {
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2"
   },
   "scripts": {
-    "build:windows": "bun build index.js --compile --outfile out/littletinystorage-win --minify --sourcemap --target bun-windows-x64",
-    "build:linux-x64": "bun build index.js --compile --outfile out/littletinystorage-linux-x64 --minify --sourcemap --target bun-linux-x64",
-    "build:linux-arm64": "bun build index.js --compile --outfile out/littletinystorage-linux-arm64 --minify --sourcemap --target bun-linux-arm64",
+    "build:windows": "bun build dist/index.js --compile --outfile out/littletinystorage-win --minify --sourcemap --target bun-windows-x64",
+    "build:linux-x64": "bun build dist/index.js --compile --outfile out/littletinystorage-linux-x64 --minify --sourcemap --target bun-linux-x64",
+    "build:linux-arm64": "bun build dist/index.js --compile --outfile out/littletinystorage-linux-arm64 --minify --sourcemap --target bun-linux-arm64",
     "build:linux": "npm run build:linux-x64 && npm run build:linux-arm64",
-    "build:macos-x64": "bun build index.js --compile --outfile out/littletinystorage-macos-x64 --minify --sourcemap --target bun-darwin-x64",
-    "build:macos-arm64": "bun build index.js --compile --outfile out/littletinystorage-macos-arm64 --minify --sourcemap --target bun-darwin-arm64",
-    "build": "npm run build:windows && npm run build:linux && npm run build:macos-x64 && npm run build:macos-arm64"
+    "build:macos-x64": "bun build dist/index.js --compile --outfile out/littletinystorage-macos-x64 --minify --sourcemap --target bun-darwin-x64",
+    "build:macos-arm64": "bun build dist/index.js --compile --outfile out/littletinystorage-macos-arm64 --minify --sourcemap --target bun-darwin-arm64",
+    "build": "npm run tsc && npm run build:windows && npm run build:linux && npm run build:macos-x64 && npm run build:macos-arm64",
+    "tsc": "tsc",
+    "start": "npm run tsc && node dist/index.js"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.1.0"
   }
 }
