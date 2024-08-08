@@ -93,12 +93,68 @@ PUT /mybucket/taxfraud.txt?name=groceries.txt&bucket=mysupersecurebucket&key={PR
 The API is used for things that are not related to specific files, like checking if a token is valid or generating a new token.
 API requests are always in this format: `/api/:bucket/:action?args=blegh` and require an `Authorization` header with the value `Bearer {API_KEY}`.
 
+## General Routes
+
+These routes are used for general actions not linked to a specific bucket.
+
+### Ping
+
+This endpoint will return a message saying "littletinystorage". It will work even if the api key is invalid.
+
+```
+GET /api/ping
+```
+
+Example:
+
+```
+littletinystorage
+```
+
+### Authed
+
+This endpoint will return a message saying "yes" if the api key is valid.
+
+```
+GET /api/authed
+```
+
+Example:
+
+```
+yes
+```
+
+### Buckets
+
+This endpoint will return a list of all the buckets that are configured.
+
+```
+GET /api/buckets
+```
+
+Example:
+
+```
+["bucket1", "bucket2"]
+```
+
+## Bucket Routes
+
+These routes are used for actions related to a specific bucket.
+
 ### Hello!
 
 This endpoint will return a message saying "Welcome to :bucket!" if the bucket is valid.
 
 ```
 GET /api/:bucket/hello
+```
+
+Example:
+
+```
+Welcome to bucket1!
 ```
 
 ### Check a token
@@ -145,4 +201,18 @@ GET /api/bucket1/generateToken?file=taxfraud.txt&type=download&expiresIn=60s
 GET /api/bucket1/generateToken?file=taxfraud.txt
 GET /api/bucket1/generateToken?type=rename
 GET /api/bucket1/generateToken?expiresIn=60y
+```
+
+## Get a list of files
+
+This endpoint will return a list of all the files in the specified bucket.
+
+```
+GET /api/:bucket/files
+```
+
+Example:
+
+```
+["file1.txt", "file2.txt", "file3.txt"]
 ```
