@@ -47,7 +47,10 @@ export const requestListener = async function (
       "Access-Control-Allow-Methods",
       "GET,POST,PUT,DELETE,OPTIONS"
     );
-    res.setHeader("Access-Control-Allow-Headers", "Authorization");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Authorization, Content-Type"
+    );
   }
 
   if (req.method === "OPTIONS") return resp(res, 200);
