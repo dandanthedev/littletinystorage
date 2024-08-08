@@ -1,0 +1,24 @@
+name: Tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - uses: actions/checkout@v2
+      - name: Install Dependencies
+        run: bun install
+      - name: "Use default .env"
+        run: cp .env.example .env
+      - name: Run Tests
+        run: bun run test
