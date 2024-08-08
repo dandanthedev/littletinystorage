@@ -17,7 +17,7 @@ export async function test(logger) {
     let hadPublic = false;
     let hadDir = false;
 
-    for (const bucket of buckets) {
+    for (let bucket of buckets) {
         bucket = bucket.toUpperCase();
         if (process.env[`${bucket}_PUBLIC`] === "true") {
             hadPublic = true;
