@@ -11,6 +11,7 @@
     "allowImportingTsExtensions": false,
     "lib": ["ES2021.String"],
     "moduleDetection": "force",
-    "removeComments": true
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true
   }
 }

@@ -7,6 +7,8 @@ import * as path from "path";
 import * as https from "https";
 import { buckets, dataDir } from "./utils.js";
 import { createServer, requestListener } from "./http.js";
+import { requestListener as uiRequestListener } from "./ui.js";
+import anzip from "anzip";
 
 //Initial setup
 if (!process.env.HEYA) {
@@ -29,6 +31,34 @@ if (!process.env.HEYA) {
       "Please rename .env.example to .env and fill in the required variables"
     );
     process.exit(1);
+  }
+}
+
+//WebUI
+if (process.env.ENABLE_WEBUI === "true") {
+  const webExists = fs.existsSync("./web");
+  if (!webExists) {
+    console.log("Downloading web interface...");
+    //delete old zip
+    if (fs.existsSync("./webui.zip")) fs.unlinkSync("./webui.zip");
+    fetch(
+      "https://github.com/dandanthedev/littletinystorage-webui/releases/latest/download/build.zip"
+    )
+      .then((res) => res.arrayBuffer())
+      .then((buffer) => {
+        fs.writeFileSync("./webui.zip", Buffer.from(buffer));
+        console.log("Web interface downloaded, extracting...");
+        anzip("webui.zip").then(() => {
+          console.log(
+            "Web interface extracted, deleting zip file and renaming build folder..."
+          );
+          fs.unlinkSync("./webui.zip");
+          setTimeout(() => {
+            //todo: find better solution
+            fs.renameSync("./build", "./web");
+          }, 100);
+        });
+      });
   }
 }
 
@@ -75,5 +105,7 @@ if (process.env.DELETE_BUCKETS_WHEN_ENV_REMOVED === "true") {
 }
 
 const port = parseInt(process.env.PORT ?? "7999");
+const uiPort = parseInt(process.env.UI_PORT ?? "7998");
 
-createServer(requestListener, port);
+createServer(requestListener, port, "LTS");
+createServer(uiRequestListener, uiPort, "WebUI");

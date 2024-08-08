@@ -17,6 +17,7 @@ A little tiny file storage server, for the people that use S3 when they really d
 - Directory listings
 - Store on your own server
 - Completely configured using environment variables
+- A web interface for managing your buckets and files
 
 ## Setup
 

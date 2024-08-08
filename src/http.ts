@@ -26,9 +26,10 @@ const directoryTemplate = `
 
 export function createServer(
   requestListener: http.RequestListener,
-  port: number
+  port: number,
+  name: string
 ) {
-  console.log(`🚀 LTS is running on port ${port}`);
+  console.log(`🚀 ${name} is running on port ${port}`);
   return http.createServer(requestListener).listen(port);
 }
 
