@@ -23,10 +23,10 @@ tests.forEach(async test => {
     }
     const result = await testFile.test(logger);
     if (result !== true) {
-        testerLogger(`Test ${testName} failed! 😢`, kleur.bgRed, kleur.white);
+        testerLogger(`${testName} failed! 😢`, kleur.bgRed, kleur.white);
         process.exit(1);
     }
-    testerLogger(`Test ${testName} passed! 🎉`, kleur.green);
+    testerLogger(`${testName} passed! 🎉`, kleur.green);
     passed++;
     if (passed === tests.length) {
         testerLogger("All tests passed! 🎉", kleur.bgGreen, kleur.black);
