@@ -11,19 +11,20 @@ export function resp(
   res: ServerResponse,
   status: number,
   body?: ResponseBody,
-  type?: ResponseType
+  type?: ResponseType,
+  mimeType?: string
 ) {
   if (typeof body === "object" && !(body instanceof ReadStream))
     body = JSON.stringify(body);
 
-  if (type) {
+  if (type && !mimeType) {
     if (type === "json") res.setHeader("Content-Type", "application/json");
     if (type === "html") res.setHeader("Content-Type", "text/html");
     if (type === "file")
       res.setHeader("Content-Type", "application/octet-stream");
   }
+  if (mimeType) res.setHeader("Content-Type", mimeType);
   res.writeHead(status);
-
   if (body instanceof ReadStream) {
     body.pipe(res);
   } else {
