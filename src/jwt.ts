@@ -30,7 +30,7 @@ export async function generateSignedToken(
 
 export async function verifyToken(
   token: string,
-  bucket: string,
+  bucket: string | null,
   file: string | null,
   type: string | null
 ) {
@@ -39,7 +39,6 @@ export async function verifyToken(
   try {
     const toCheck = [bucket, file, type];
     const decoded = jwt.verify(token, "pleasehackme");
-    console.log(decoded);
     if (!decoded)
       return {
         authorized: false,
