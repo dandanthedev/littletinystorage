@@ -18,8 +18,7 @@ export async function test(logger) {
     let hadDir = false;
 
     for (let bucket of buckets) {
-        bucket = bucket.toUpperCase();
-        if (process.env[`${bucket}_PUBLIC`] === "true") {
+        if (process.env[`${bucket.toUpperCase()}_PUBLIC`] === "true") {
             hadPublic = true;
             //add test file to bucket
             fs.writeFileSync(`./data/${bucket}/LTSTestFile.txt`, "test");
@@ -33,7 +32,7 @@ export async function test(logger) {
                 return false;
             }
         }
-        if (process.env[`${bucket}_DIR`] === "true") {
+        if (process.env[`${bucket.toUpperCase()}_DIR`] === "true") {
             hadDir = true;
             const fetchURL = `${url}/${bucket}`;
             logger("Attempting to access directory at " + fetchURL);
