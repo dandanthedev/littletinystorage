@@ -22,5 +22,11 @@ export function resp(
   res.end(body);
 }
 
+export function envCheck(bucket: string, setting: string) {
+  bucket = bucket.toUpperCase();
+  setting = setting.toUpperCase();
+  const env = `${bucket}_${setting}`;
+  return process.env[env];
+}
 export const buckets = process.env.BUCKETS?.split(",") ?? [];
 export const dataDir = process.env.DATA_DIR || "./data";

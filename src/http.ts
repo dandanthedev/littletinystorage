@@ -3,7 +3,7 @@ config();
 
 import { handleAPIRequest } from "./api/index.js";
 import { resp } from "./utils.js";
-import { buckets, dataDir } from "./utils.js";
+import { buckets, dataDir, envCheck } from "./utils.js";
 import * as fs from "fs";
 import * as path from "path";
 import { IncomingMessage, ServerResponse } from "http";
@@ -57,7 +57,7 @@ export const requestListener = async function (
   console.log(file);
   if (!file) {
     if (
-      process.env[bucket.toUpperCase() + "_DIR"] === "true" &&
+      envCheck(bucket, "DIR") === "true" &&
       fs.existsSync(path.join(dataDir, bucket))
     ) {
       const files = fs.readdirSync(path.join(dataDir, bucket));
@@ -100,10 +100,7 @@ export const requestListener = async function (
 
     const filePath = path.join(dataDir, bucket, file);
 
-    if (
-      process.env[bucket.toUpperCase() + "_PUBLIC"] === "true" &&
-      type === "download"
-    ) {
+    if (envCheck(bucket, "PUBLIC") === "true" && type === "download") {
       if (!fs.existsSync(filePath)) return resp(res, 404);
       return resp(res, 200, fs.readFileSync(filePath), "file");
     }
