@@ -29,14 +29,14 @@ export async function handleAPIRequest(
   env: any
 ) {
   const buckets = env.buckets;
-
   const bucket = req?.url ? req.url.split("/")[2] : "";
-  const apiPath = req.url ? req.url.split("/")[3].split("?")[0] : null;
+  const apiPathStart = req.url ? req.url.split("/")[3] : null;
+  const apiPath = apiPathStart ? apiPathStart.split("?")[0] : null;
   console.log(req.url, bucket, apiPath);
   if (!bucket || !apiPath)
     return resp(
       res,
-      400,
+      200,
       "Welcome to the API, please provide a bucket and an action to perform."
     );
 

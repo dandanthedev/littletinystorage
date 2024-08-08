@@ -4,7 +4,8 @@
   "type": "module",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "kleur": "^4.1.5"
   },
   "scripts": {
     "build:windows": "bun build dist/index.js --compile --outfile out/littletinystorage-win --minify --sourcemap --target bun-windows-x64",
@@ -15,7 +16,8 @@
     "build:macos-arm64": "bun build dist/index.js --compile --outfile out/littletinystorage-macos-arm64 --minify --sourcemap --target bun-darwin-arm64",
     "build": "npm run tsc && npm run build:windows && npm run build:linux && npm run build:macos-x64 && npm run build:macos-arm64",
     "tsc": "tsc",
-    "start": "npm run tsc && node dist/index.js"
+    "start": "npm run tsc && node dist/index.js",
+    "test": "npm run tsc && node test.js"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.6",

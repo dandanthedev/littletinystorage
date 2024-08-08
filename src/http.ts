@@ -57,7 +57,7 @@ export const requestListener = async function (
   console.log(file);
   if (!file) {
     if (
-      process.env[bucket + "_DIR"] === "true" &&
+      process.env[bucket.toUpperCase() + "_DIR"] === "true" &&
       fs.existsSync(path.join(dataDir, bucket))
     ) {
       const files = fs.readdirSync(path.join(dataDir, bucket));
@@ -100,7 +100,10 @@ export const requestListener = async function (
 
     const filePath = path.join(dataDir, bucket, file);
 
-    if (process.env[bucket + "_PUBLIC"] === "true" && type === "download") {
+    if (
+      process.env[bucket.toUpperCase() + "_PUBLIC"] === "true" &&
+      type === "download"
+    ) {
       if (!fs.existsSync(filePath)) return resp(res, 404);
       return resp(res, 200, fs.readFileSync(filePath), "file");
     }

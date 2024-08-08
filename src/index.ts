@@ -4,6 +4,7 @@ config();
 import { IncomingMessage } from "http";
 import * as fs from "fs";
 import * as path from "path";
+import * as https from "https";
 import { buckets, dataDir } from "./utils.js";
 import { createServer, requestListener } from "./http.js";
 
@@ -11,7 +12,6 @@ import { createServer, requestListener } from "./http.js";
 if (!process.env.HEYA) {
   if (!fs.existsSync("./.env.example")) {
     console.log("Downloading .env.example...");
-    const https = require("https");
     https.get(
       "https://raw.githubusercontent.com/dandanthedev/littletinystorage/main/.env.example",
       function (response: IncomingMessage) {
