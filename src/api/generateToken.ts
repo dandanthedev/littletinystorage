@@ -13,14 +13,13 @@ export default async function handle(
   const type = params.get("type");
   const expiresIn = params.get("expiresIn");
 
-  console.log(bucket, file, type, expiresIn);
-
   if (!buckets.includes(bucket)) return resp(res, 400, "Invalid bucket");
 
   if (type && ["upload", "download", "delete", "rename"].indexOf(type) === -1)
     return resp(res, 400, "Invalid type");
 
   const token = await generateSignedToken(bucket, file, type, expiresIn);
+  if (!token) return resp(res, 400, "Error generating token");
 
   resp(res, 200, token);
 }

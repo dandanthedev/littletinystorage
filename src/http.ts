@@ -9,6 +9,7 @@ import * as path from "path";
 import { IncomingMessage, ServerResponse } from "http";
 import { verifyToken } from "./jwt.js";
 import * as http from "http";
+import { deleteFile, streamFile, uploadFile, moveFile } from "./reader.js";
 
 //TODO: find a better way to do this + make it editable by user
 const directoryTemplate = `
@@ -35,6 +36,25 @@ export const requestListener = async function (
   req: IncomingMessage,
   res: ServerResponse
 ) {
+  const origin = req.headers.origin;
+  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(",") ?? [];
+  if (
+    origin &&
+    (allowedOrigins.includes(origin) || allowedOrigins.includes("*"))
+  ) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,DELETE,OPTIONS"
+    );
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Authorization, Content-Type"
+    );
+  }
+
+  if (req.method === "OPTIONS") return resp(res, 200);
+
   const params = getQuery(req?.url ?? "");
 
   if (req?.url && req.url.startsWith("/api"))
@@ -51,8 +71,6 @@ export const requestListener = async function (
 
   const file = getURLParam(req?.url ?? "", 2);
 
-  console.log(params);
-  console.log(file);
   if (!file) {
     if (
       envCheck(bucket, "DIR") === "true" &&
@@ -96,11 +114,10 @@ export const requestListener = async function (
     else if (req.method === "PUT") type = "rename";
     else return resp(res, 400, "Invalid method");
 
-    const filePath = path.join(dataDir, bucket, file);
-
     if (envCheck(bucket, "PUBLIC") === "true" && type === "download") {
-      if (!fs.existsSync(filePath)) return resp(res, 404);
-      return resp(res, 200, fs.readFileSync(filePath), "file");
+      const foundFile = streamFile(bucket, file);
+      if (!foundFile) return resp(res, 404);
+      return resp(res, 200, foundFile, "file");
     }
 
     const key = params.get("key");
@@ -127,8 +144,9 @@ export const requestListener = async function (
     if (decoded?.type) res.setHeader("Token-Type", decoded.type ?? "any");
 
     if (type === "download") {
-      if (!fs.existsSync(filePath)) return resp(res, 404);
-      return resp(res, 200, fs.readFileSync(filePath), "file");
+      const foundFile = streamFile(bucket, file);
+      if (!foundFile) return resp(res, 404);
+      return resp(res, 200, foundFile, "file");
     }
     if (type === "upload") {
       const data: Buffer = await new Promise((resolve) => {
@@ -140,16 +158,14 @@ export const requestListener = async function (
           resolve(Buffer.concat(chunks));
         });
       });
-      fs.writeFileSync(filePath, data);
+      uploadFile(bucket, file, data);
       return resp(res, 200);
     }
     if (type === "delete") {
-      if (!fs.existsSync(filePath)) return resp(res, 404, "File not found");
-      fs.unlinkSync(filePath);
+      deleteFile(bucket, file);
       return resp(res, 200);
     }
     if (type === "rename") {
-      if (!fs.existsSync(filePath)) return resp(res, 404, "File not found");
       const newName = params.get("name");
       const newBucket = params.get("bucket");
 
@@ -163,10 +179,13 @@ export const requestListener = async function (
       if (newBucket && process.env.MOVING_ACROSS_BUCKETS !== "true")
         return resp(res, 400, "Moving files across buckets is disabled");
 
+      if (newBucket && !buckets.includes(newBucket))
+        return resp(res, 400, "Invalid destination bucket");
+
       const nameToSet = newName ?? file;
       const bucketToSet = newBucket ?? bucket;
 
-      fs.renameSync(filePath, path.join(dataDir, bucketToSet, nameToSet));
+      moveFile(bucket, file, bucketToSet, nameToSet);
       return resp(res, 200);
     }
   }

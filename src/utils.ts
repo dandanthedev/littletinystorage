@@ -2,9 +2,10 @@ import { config } from "dotenv";
 config();
 
 import { ServerResponse } from "http";
+import { ReadStream } from "fs";
 
 type ResponseType = "json" | "html" | "file";
-type ResponseBody = string | Buffer;
+type ResponseBody = string | null | ReadStream;
 
 export function resp(
   res: ServerResponse,
@@ -12,6 +13,9 @@ export function resp(
   body?: ResponseBody,
   type?: ResponseType
 ) {
+  if (typeof body === "object" && !(body instanceof ReadStream))
+    body = JSON.stringify(body);
+
   if (type) {
     if (type === "json") res.setHeader("Content-Type", "application/json");
     if (type === "html") res.setHeader("Content-Type", "text/html");
@@ -19,7 +23,12 @@ export function resp(
       res.setHeader("Content-Type", "application/octet-stream");
   }
   res.writeHead(status);
-  res.end(body);
+
+  if (body instanceof ReadStream) {
+    body.pipe(res);
+  } else {
+    res.end(body);
+  }
 }
 
 export function envCheck(bucket: string, setting: string) {

@@ -1,7 +1,9 @@
 name: Build + Deploy to GitHub Releases
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
   build:
     runs-on: ubuntu-latest
