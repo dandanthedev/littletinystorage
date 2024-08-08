@@ -1,6 +1,7 @@
 import { config } from "dotenv";
-import { IncomingMessage } from "http";
 config();
+
+import { IncomingMessage } from "http";
 import * as fs from "fs";
 import * as path from "path";
 import { buckets, dataDir } from "./utils.js";

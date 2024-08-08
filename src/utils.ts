@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config();
+
 import { ServerResponse } from "http";
 
 type ResponseType = "json" | "html" | "file";

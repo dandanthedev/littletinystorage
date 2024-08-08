@@ -1,5 +1,6 @@
 import * as jwt from "jsonwebtoken";
-
+import { config } from "dotenv";
+config();
 export async function generateSignedToken(
   bucket: string | null,
   file: string | null,
