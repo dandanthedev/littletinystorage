@@ -14,6 +14,7 @@ A little tiny file storage server, for the people that use S3 when they really d
 - Get, upload, delete and rename files (across buckets!)
 - Upload using presigned URLs
 - Download using presigned URLs (private buckets)
+- Stores files as, well... files!
 - Directory listings
 - Store on your own server
 - Completely configured using environment variables
