@@ -19,6 +19,7 @@ export default async function handle(
     return resp(res, 400, "Invalid type");
 
   const token = await generateSignedToken(bucket, file, type, expiresIn);
+  if (!token) return resp(res, 400, "Error generating token");
 
   resp(res, 200, token);
 }
