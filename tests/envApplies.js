@@ -27,6 +27,7 @@ export async function test(logger) {
             const res = await fetch(fetchURL);
             if (res.ok) {
                 logger(`File accessible in ${bucket} bucket`);
+                fs.unlinkSync(`./data/${bucket}/LTSTestFile.txt`);
             } else {
                 logger(`File not accessible in ${bucket} bucket`);
                 return false;
