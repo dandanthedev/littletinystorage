@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config();
+
 import { handleAPIRequest } from "./api/index.js";
 import { resp } from "./utils.js";
 import { buckets, dataDir } from "./utils.js";
