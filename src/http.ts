@@ -42,9 +42,13 @@ export const requestListener = async function (
 
   if (req.url === "/")
     return resp(res, 200, process.env.WELCOME_MESSAGE ?? "LittleTinyStorage");
-  const bucket = req.url ? req.url.split("/")[1].split("/")[0] : "";
+
+  const bucketStart = req?.url ? req.url.split("/")[1] : "";
+  const bucket = bucketStart.split("/")[0];
   if (!buckets.includes(bucket)) return resp(res, 404, "Bucket not found");
-  const file = req.url ? req.url.split("/")[2].split("?")[0] : null;
+  const fileStart = req.url ? req.url.split("/")[2] : null;
+  const fileF = fileStart ? fileStart.split("/")[0] : null;
+  const file = fileF ? fileF.split("?")[0] : null;
 
   console.log(params);
   console.log(file);
