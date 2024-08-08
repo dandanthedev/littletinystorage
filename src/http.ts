@@ -2,7 +2,7 @@ import { config } from "dotenv";
 config();
 
 import { handleAPIRequest } from "./api/index.js";
-import { resp } from "./utils.js";
+import { getQuery, getURLParam, resp } from "./utils.js";
 import { buckets, dataDir, envCheck } from "./utils.js";
 import * as fs from "fs";
 import * as path from "path";
@@ -35,8 +35,7 @@ export const requestListener = async function (
   req: IncomingMessage,
   res: ServerResponse
 ) {
-  const query = req.url ? req.url.split("?")[1] : "";
-  const params = new URLSearchParams(query);
+  const params = getQuery(req?.url ?? "");
 
   if (req?.url && req.url.startsWith("/api"))
     return await handleAPIRequest(req, res, params, {
@@ -46,12 +45,11 @@ export const requestListener = async function (
   if (req.url === "/")
     return resp(res, 200, process.env.WELCOME_MESSAGE ?? "LittleTinyStorage");
 
-  const bucketStart = req?.url ? req.url.split("/")[1] : "";
-  const bucket = bucketStart.split("/")[0];
+  const bucket = getURLParam(req?.url ?? "", 1);
+  if (!bucket) return resp(res, 400, "Bucket was not found in URL.");
   if (!buckets.includes(bucket)) return resp(res, 404, "Bucket not found");
-  const fileStart = req.url ? req.url.split("/")[2] : null;
-  const fileF = fileStart ? fileStart.split("/")[0] : null;
-  const file = fileF ? fileF.split("?")[0] : null;
+
+  const file = getURLParam(req?.url ?? "", 2);
 
   console.log(params);
   console.log(file);
