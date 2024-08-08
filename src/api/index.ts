@@ -6,6 +6,7 @@ import * as path from "path";
 import checkToken from "./checkToken.js";
 import generateToken from "./generateToken.js";
 import hello from "./hello.js";
+import { getURLParam } from "../utils.js";
 
 const routes = [
   {
@@ -29,9 +30,8 @@ export async function handleAPIRequest(
   env: any
 ) {
   const buckets = env.buckets;
-  const bucket = req?.url ? req.url.split("/")[2] : "";
-  const apiPathStart = req.url ? req.url.split("/")[3] : null;
-  const apiPath = apiPathStart ? apiPathStart.split("?")[0] : null;
+  const bucket = getURLParam(req?.url ?? "", 2);
+  const apiPath = getURLParam(req?.url ?? "", 3);
   console.log(req.url, bucket, apiPath);
   if (!bucket || !apiPath)
     return resp(

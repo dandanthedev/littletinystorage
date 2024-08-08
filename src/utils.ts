@@ -22,5 +22,26 @@ export function resp(
   res.end(body);
 }
 
+export function envCheck(bucket: string, setting: string) {
+  bucket = bucket.toUpperCase();
+  setting = setting.toUpperCase();
+  const env = `${bucket}_${setting}`;
+  return process.env[env];
+}
+
+export function getURLParam(url: string, key: number) {
+  const urlParts = url.split("/");
+  const part = urlParts[key];
+  if (!part) return null;
+  const partParts = part.split("?");
+  return partParts[0];
+}
+
+export function getQuery(url: string) {
+  const urlParts = url.split("?");
+  if (urlParts.length < 2) return new URLSearchParams();
+  return new URLSearchParams(urlParts[1]);
+}
+
 export const buckets = process.env.BUCKETS?.split(",") ?? [];
 export const dataDir = process.env.DATA_DIR || "./data";
