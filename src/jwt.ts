@@ -1,4 +1,4 @@
-import * as jwt from "jsonwebtoken";
+import { sign, verify } from "jsonwebtoken-esm";
 import { config } from "dotenv";
 config();
 export async function generateSignedToken(
@@ -10,7 +10,7 @@ export async function generateSignedToken(
   if (!process.env.SECRET)
     console.warn("SECRET IS MISSING! USING VERY INSECURE DEFAULT SECRET");
   try {
-    const token = jwt.sign(
+    const token = sign(
       {
         bucket: bucket,
         file: file,
@@ -38,7 +38,7 @@ export async function verifyToken(
     console.warn("SECRET IS MISSING! USING VERY INSECURE DEFAULT SECRET");
   try {
     const toCheck = [bucket, file, type];
-    const decoded = jwt.verify(token, "pleasehackme");
+    const decoded = verify(token, "pleasehackme");
     if (!decoded)
       return {
         authorized: false,
