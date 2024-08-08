@@ -18,6 +18,7 @@ export async function test(logger) {
     let hadDir = false;
 
     for (const bucket of buckets) {
+        bucket = bucket.toUpperCase();
         if (process.env[`${bucket}_PUBLIC`] === "true") {
             hadPublic = true;
             //add test file to bucket
