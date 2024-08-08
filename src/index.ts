@@ -41,6 +41,18 @@ if (buckets.length == 0) {
   console.error("Please set up some buckets in the .env file");
   process.exit(1);
 }
+
+const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS?.split(",") ?? [];
+if (allowedOrigins.length == 0) {
+  console.error("Please set up some CORS allowed origins in the .env file");
+  process.exit(1);
+}
+if (allowedOrigins.includes("*")) {
+  console.warn(
+    "Allowing all origins is not recommended, please set up some CORS allowed origins in the .env file"
+  );
+}
+
 //Create + delete buckets
 buckets.forEach((bucket) => {
   const bucketPath = path.join(dataDir, bucket);
