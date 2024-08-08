@@ -6,6 +6,11 @@ import * as path from "path";
 import checkToken from "./checkToken.js";
 import generateToken from "./generateToken.js";
 import hello from "./hello.js";
+import ping from "./ping.js";
+import authed from "./authed.js";
+import buckets from "./buckets.js";
+import files from "./files.js";
+
 import { getURLParam } from "../utils.js";
 
 const routes = [
@@ -21,6 +26,29 @@ const routes = [
     path: "hello",
     handler: hello,
   },
+  {
+    path: "files",
+    handler: files,
+  },
+];
+
+const unauthedRoutes = [
+  {
+    path: "ping",
+    handler: ping,
+  },
+];
+
+const authedRoutes = [
+  ...unauthedRoutes,
+  {
+    path: "authed",
+    handler: authed,
+  },
+  {
+    path: "buckets",
+    handler: buckets,
+  },
 ];
 
 export async function handleAPIRequest(
@@ -32,14 +60,15 @@ export async function handleAPIRequest(
   const buckets = env.buckets;
   const bucket = getURLParam(req?.url ?? "", 2);
   const apiPath = getURLParam(req?.url ?? "", 3);
-  console.log(req.url, bucket, apiPath);
-  if (!bucket || !apiPath)
-    return resp(
-      res,
-      200,
-      "Welcome to the API, please provide a bucket and an action to perform."
-    );
 
+  if (bucket && !apiPath && !req.headers.authorization) {
+    const route = unauthedRoutes.find((route) => route.path === bucket);
+    if (route)
+      return await route.handler(req, res, params, resp, {
+        buckets,
+        bucket,
+      });
+  }
   if (
     !req.headers.authorization ||
     !req.headers.authorization.startsWith("Bearer ")
@@ -49,7 +78,22 @@ export async function handleAPIRequest(
   if (req.headers.authorization.split(" ")[1] !== process.env.API_KEY)
     return resp(res, 401, "Invalid API key");
 
-  console.log(bucket);
+  if (bucket && !apiPath) {
+    const route = authedRoutes.find((route) => route.path === bucket);
+    if (route)
+      return await route.handler(req, res, params, resp, {
+        buckets,
+        bucket,
+      });
+  }
+
+  if (!bucket || !apiPath)
+    return resp(
+      res,
+      200,
+      "Welcome to the API, please provide a bucket and an action to perform."
+    );
+
   if (!buckets.includes(bucket)) return resp(res, 400, "Invalid bucket");
 
   const route = routes.find((route) => route.path === apiPath);
