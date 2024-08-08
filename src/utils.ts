@@ -5,7 +5,7 @@ import { ServerResponse } from "http";
 import { ReadStream } from "fs";
 
 type ResponseType = "json" | "html" | "file";
-type ResponseBody = string | Buffer | ReadStream;
+type ResponseBody = string | null | ReadStream;
 
 export function resp(
   res: ServerResponse,
