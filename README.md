@@ -236,3 +236,28 @@ Example:
 ```
 ["file1.txt", "file2.txt", "file3.txt"]
 ```
+
+### Get a list of files + metadata
+
+This endpoint will return a list of all the files in the specified bucket, along with their metadata.
+
+```
+GET /api/:bucket/files?metadata=true
+```
+
+Example:
+
+```
+[{
+	"file":"img2.jpg",
+	"mimeType":"image/jpeg",
+	"size":24125,
+	"lastModified":"2024-08-07T21:37:50.471Z"
+},
+{
+	"file":"LTSTestFile.txt",
+	"mimeType":"text/plain",
+	"size":4,
+	"lastModified":"2024-08-08T14:20:30.679Z"
+}]
+```
