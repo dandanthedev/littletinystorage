@@ -3,10 +3,9 @@
 
 # LittleTinyStorage
 
-A little tiny (s3 compatible) file storage server
+A Little Tiny (S3 compatible) file storage server
 
 > Note: This project is still in early development. It should be fully functional, but there might be bugs. If you find any, please report them!
-> Note 2: S3 compatibility is not yet implemented but very much at the top of our roadmap :D!
 
 </div>
 
