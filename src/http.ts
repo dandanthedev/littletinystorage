@@ -24,6 +24,38 @@ const directoryTemplate = `
 
 `;
 
+async function canAccessFile(
+  bucket: string,
+  key: string | null,
+  file: string,
+  type: string,
+  res: ServerResponse
+) {
+  const envPublic = envCheck(bucket, "PUBLIC");
+  if (envPublic === "true") return true;
+
+  //authentication is required
+  if (!key) return "Key required";
+  //check key
+  const { authorized, timeLeft, decoded } = await verifyToken(
+    key,
+    bucket,
+    file,
+    type
+  );
+  if (!authorized)
+    return "Token is not valid or not authorized to perform this action";
+
+  if (res) {
+    res.setHeader("Bucket", bucket);
+    if (timeLeft) res.setHeader("Token-ExpiresIn", timeLeft ?? "never");
+    if (decoded?.file) res.setHeader("Token-File", decoded.file ?? "any");
+    if (decoded?.type) res.setHeader("Token-Type", decoded.type ?? "any");
+  }
+
+  return true;
+}
+
 export function createServer(
   requestListener: http.RequestListener,
   port: number,
@@ -57,6 +89,34 @@ export const requestListener = async function (
   if (req.method === "OPTIONS") return resp(res, 200);
 
   const params = getQuery(req?.url ?? "");
+
+  //custom urls
+  const hostname = req.headers.host;
+  console.log(hostname);
+
+  if (hostname) {
+    for (const bucket of buckets) {
+      const envPublicURLS = envCheck(bucket, "PUBLIC_URLS")?.split(",") ?? [];
+      if (envPublicURLS.includes(hostname)) {
+        const file = getURLParam(req?.url ?? "", 1);
+        if (!file) return resp(res, 200, bucket);
+        const key = params.get("key");
+        //check if file is accessible
+        const canAccess = await canAccessFile(
+          bucket,
+          key,
+          file,
+          "download",
+          res
+        );
+        if (canAccess !== true) return resp(res, 401, canAccess);
+
+        const foundFile = streamFile(bucket, file);
+        if (!foundFile) return resp(res, 404);
+        return resp(res, 200, foundFile, "file");
+      }
+    }
+  }
 
   if (req?.url && req.url.startsWith("/api"))
     return await handleAPIRequest(req, res, params, {
@@ -115,7 +175,8 @@ export const requestListener = async function (
     else if (req.method === "PUT") type = "rename";
     else return resp(res, 400, "Invalid method");
 
-    if (envCheck(bucket, "PUBLIC") === "true" && type === "download") {
+    if (await canAccessFile(bucket, null, file, "download", res)) {
+      //if accessible without authentication
       const foundFile = streamFile(bucket, file);
       if (!foundFile) return resp(res, 404);
       return resp(res, 200, foundFile, "file");
@@ -125,24 +186,8 @@ export const requestListener = async function (
 
     if (!key) return resp(res, 401, "Key required");
 
-    const { authorized, timeLeft, decoded } = await verifyToken(
-      key,
-      bucket,
-      file,
-      type
-    );
-    if (!authorized)
-      return resp(
-        res,
-        401,
-        "Token is not valid or not authorized to perform this action"
-      );
-
-    if (bucket) res.setHeader("Bucket", bucket);
-
-    if (timeLeft) res.setHeader("Token-ExpiresIn", timeLeft ?? "never");
-    if (decoded?.file) res.setHeader("Token-File", decoded.file ?? "any");
-    if (decoded?.type) res.setHeader("Token-Type", decoded.type ?? "any");
+    const canAccess = await canAccessFile(bucket, key, file, type, res);
+    if (canAccess !== true) return resp(res, 401, canAccess);
 
     if (type === "download") {
       const foundFile = streamFile(bucket, file);
