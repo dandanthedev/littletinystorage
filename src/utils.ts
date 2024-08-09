@@ -44,6 +44,7 @@ export function resp(
       res.setHeader("Content-Type", "application/octet-stream");
     if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
+  if (!type) res.setHeader("Content-Type", "text/plain");
   if (mimeType) res.setHeader("Content-Type", mimeType);
   res.writeHead(status);
   if (body instanceof ReadStream) {
