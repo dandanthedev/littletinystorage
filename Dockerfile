@@ -8,8 +8,10 @@ COPY package-lock.json .
 RUN npm ci
 
 COPY . .
+RUN npm run tsc
 
 EXPOSE 7999
 VOLUME [ "/data" ]
+ENV DATA_DIR=/data
 
-CMD [ "node", "index.js" ]
+CMD [ "node", "dist/index.js" ]
