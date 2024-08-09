@@ -1,6 +1,12 @@
 import { IncomingMessage, ServerResponse } from "http";
 import { resp, buckets, getURLParam } from "./utils.js";
-import { getFilesAWS, pipeFile } from "./reader.js";
+import {
+  pipeFile,
+  pipeFileStream,
+  streamFile,
+  getFilesAWS,
+  getETag,
+} from "./reader.js";
 export const requestListener = async function (
   req: IncomingMessage,
   res: ServerResponse
@@ -74,6 +80,44 @@ export const requestListener = async function (
     await pipeFile(bucket, fileName, req);
 
     return resp(res, 200);
+  }
+
+  if (action === "CopyObject") {
+    if (!bucket) return resp(res, 400, "BucketMissing", "awsError");
+
+    let source = req.headers["x-amz-copy-source"];
+    if (Array.isArray(source)) source = source[0];
+
+    if (!source) return resp(res, 400, "SourceMissing", "awsError");
+
+    const sourceSplit = source?.split("/");
+    const sourceBucket = sourceSplit?.[0];
+    const sourceKey = sourceSplit?.[1];
+    if (!sourceBucket || !sourceKey)
+      return resp(res, 400, "SourceMissing", "awsError");
+
+    const destKey = getURLParam(req.url, 1, true);
+    if (!destKey) return resp(res, 400, "DestinationMissing", "awsError");
+
+    console.log("Copying", sourceBucket, sourceKey, "to", bucket, destKey);
+
+    const file = streamFile(sourceBucket, sourceKey);
+
+    if (!file) return resp(res, 404, "SourceFileNotFound", "awsError");
+
+    await pipeFileStream(bucket, destKey, file);
+
+    return resp(
+      res,
+      200,
+      {
+        CopyObjectResult: {
+          LastModified: new Date().toISOString(),
+          ETag: getETag(bucket, destKey),
+        },
+      },
+      "xml"
+    );
   }
 
   return resp(

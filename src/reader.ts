@@ -52,6 +52,24 @@ export async function pipeFile(
   });
 }
 
+export async function pipeFileStream(
+  bucket: string,
+  file: string,
+  stream: fs.ReadStream
+) {
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  const filePath = path.join(bucketPath, safeFile);
+
+  return new Promise((resolve) => {
+    stream.pipe(fs.createWriteStream(filePath));
+    stream.on("end", () => {
+      resolve(true);
+    });
+  });
+}
+
 export const streamFile = (bucket: string, file: string) => {
   const safeFile = removeDirectoryChanges(file);
   const safeBucket = removeDirectoryChanges(bucket);
@@ -80,6 +98,18 @@ export function getFiles(bucket: string) {
   if (!fs.existsSync(bucketPath)) return null;
 
   return fs.readdirSync(bucketPath);
+}
+
+export function getETag(bucket: string, file: string) {
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  const filePath = path.join(bucketPath, safeFile);
+
+  if (!fs.existsSync(filePath)) return null;
+
+  const stats = fs.statSync(filePath);
+  return crypto.createHash("md5").update(stats.size.toString()).digest("hex");
 }
 
 export function getFilesAWS(bucket: string) {
