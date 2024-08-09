@@ -28,10 +28,5 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2 # Checking out the repo
-
-      - name: Build and Publish head Docker image
-        uses: TCPShield/gp-docker-action@1.1.13
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
-          image-name: littletinystorage # Provide Docker image name
+      - name: Build and Push Container to ghcr.io
+        uses: GlueOps/github-actions-build-push-containers@v0.3.7
