@@ -32,7 +32,7 @@ async function canAccessFile(
   res: ServerResponse
 ) {
   const envPublic = envCheck(bucket, "PUBLIC");
-  if (envPublic === "true") return true;
+  if (envPublic === "true" && type === "download") return true;
 
   //authentication is required
   if (!key) return "Key required";
