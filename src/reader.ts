@@ -44,10 +44,13 @@ export async function pipeFile(
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     req.pipe(fs.createWriteStream(filePath));
     req.on("end", () => {
       resolve(true);
+    });
+    req.on("error", (err) => {
+      reject(err);
     });
   });
 }
