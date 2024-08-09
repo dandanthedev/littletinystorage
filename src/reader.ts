@@ -1,6 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
 import { config } from "dotenv";
+import * as crypto from "crypto";
+import jstoxml from "jstoxml";
+
 config();
 
 let dataDir: string;
@@ -69,6 +72,41 @@ export function getFiles(bucket: string) {
   if (!fs.existsSync(bucketPath)) return null;
 
   return fs.readdirSync(bucketPath);
+}
+
+export function getFilesAWS(bucket: string) {
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  if (!fs.existsSync(bucketPath)) return null;
+
+  const files = fs.readdirSync(bucketPath);
+  const filesAWS = files.map((file) => {
+    const filePath = path.join(bucketPath, file);
+    const stats = fs.statSync(filePath);
+    const etag = crypto
+      .createHash("md5")
+      .update(stats.size.toString())
+      .digest("hex");
+    return jstoxml.toXML({
+      Contents: {
+        ETag: etag,
+        Key: file,
+        LastModified: stats.mtime.toISOString(),
+        Owner: {
+          DisplayName: "LittleTinyStorage",
+          ID: "123456789012",
+        },
+        RestoreStatus: {
+          IsRestoreInProgress: false,
+          RestoreExpiryDate: new Date(0).toISOString(),
+        },
+        Size: stats.size,
+        StorageClass: "STANDARD",
+      },
+    });
+  });
+
+  return filesAWS;
 }
 
 export const moveFile = (

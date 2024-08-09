@@ -3,9 +3,10 @@ config();
 
 import { ServerResponse } from "http";
 import { ReadStream } from "fs";
+import jstoxml from "jstoxml";
 
-type ResponseType = "json" | "html" | "file";
-type ResponseBody = string | null | ReadStream;
+type ResponseType = "json" | "html" | "file" | "xml" | "awsError";
+type ResponseBody = string | null | ReadStream | Object;
 
 export function resp(
   res: ServerResponse,
@@ -14,6 +15,25 @@ export function resp(
   type?: ResponseType,
   mimeType?: string
 ) {
+  if (type === "awsError") {
+    type = "xml";
+    body = {
+      Error: {
+        Code: body,
+      },
+    };
+  }
+
+  if (
+    type === "xml" &&
+    body &&
+    typeof body === "object" &&
+    !(body instanceof ReadStream)
+  ) {
+    console.log(body);
+    body = jstoxml.toXML(body);
+    console.log(body);
+  }
   if (typeof body === "object" && !(body instanceof ReadStream))
     body = JSON.stringify(body);
 
@@ -22,6 +42,7 @@ export function resp(
     if (type === "html") res.setHeader("Content-Type", "text/html");
     if (type === "file")
       res.setHeader("Content-Type", "application/octet-stream");
+    if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
   if (mimeType) res.setHeader("Content-Type", mimeType);
   res.writeHead(status);

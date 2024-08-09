@@ -8,6 +8,7 @@ import * as https from "https";
 import { buckets, dataDir } from "./utils.js";
 import { createServer, requestListener } from "./http.js";
 import { requestListener as uiRequestListener } from "./ui.js";
+import { requestListener as s3RequestListener } from "./s3.js";
 import anzip from "anzip";
 
 //Initial setup
@@ -106,6 +107,8 @@ if (process.env.DELETE_BUCKETS_WHEN_ENV_REMOVED === "true") {
 
 const port = parseInt(process.env.PORT ?? "7999");
 const uiPort = parseInt(process.env.UI_PORT ?? "7998");
+const s3Port = parseInt(process.env.S3_PORT ?? "7997");
 
 createServer(requestListener, port, "LTS");
 createServer(uiRequestListener, uiPort, "WebUI");
+createServer(s3RequestListener, s3Port, "S3 API");
