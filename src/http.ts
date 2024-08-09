@@ -174,7 +174,10 @@ export const requestListener = async function (
     else if (req.method === "PUT") type = "rename";
     else return resp(res, 400, "Invalid method");
 
-    if (await canAccessFile(bucket, null, file, "download", res)) {
+    if (
+      (await canAccessFile(bucket, null, file, "download", res)) &&
+      type === "download"
+    ) {
       //if accessible without authentication
       const foundFile = streamFile(bucket, file);
       if (!foundFile) return resp(res, 404);
