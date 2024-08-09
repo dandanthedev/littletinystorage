@@ -1,4 +1,4 @@
-name: Build + Deploy to GitHub Releases
+name: Build + Deploy to GitHub Releases & GHCR
 
 on:
   push:
@@ -25,3 +25,13 @@ jobs:
           draft: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2 # Checking out the repo
+
+      - name: Build and Publish head Docker image
+        uses: VaultVulp/gp-docker-action@1.1.12
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }} # Provide GITHUB_TOKEN to login into the GitHub Packages
+          image-name: littletinystorage # Provide Docker image name
