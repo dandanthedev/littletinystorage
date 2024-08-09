@@ -10,6 +10,7 @@ import ping from "./ping.js";
 import authed from "./authed.js";
 import buckets from "./buckets.js";
 import files from "./files.js";
+import fileStats from "./fileStats.js";
 
 import { getURLParam } from "../utils.js";
 
@@ -29,6 +30,10 @@ const routes = [
   {
     path: "files",
     handler: files,
+  },
+  {
+    path: "fileStats",
+    handler: fileStats,
   },
 ];
 

@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import * as crypto from "crypto";
 import jstoxml from "jstoxml";
 import { IncomingMessage } from "http";
+import mime from "mime";
 
 config();
 
@@ -101,6 +102,26 @@ export function getFiles(bucket: string) {
   if (!fs.existsSync(bucketPath)) return null;
 
   return fs.readdirSync(bucketPath);
+}
+
+export function getFilesAndStats(bucket: string) {
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  if (!fs.existsSync(bucketPath)) return null;
+
+  const files = fs.readdirSync(bucketPath);
+  const stats = files.map((file) => {
+    const filePath = path.join(bucketPath, file);
+    const stats = fs.statSync(filePath);
+    return {
+      file,
+      mimeType: mime.getType(filePath),
+      size: stats.size,
+      lastModified: stats.mtime.toISOString(),
+    };
+  });
+
+  return stats;
 }
 
 export function getETag(bucket: string, file: string) {
