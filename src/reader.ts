@@ -4,6 +4,7 @@ import { config } from "dotenv";
 import * as crypto from "crypto";
 import jstoxml from "jstoxml";
 import { IncomingMessage } from "http";
+import mime from "mime";
 
 config();
 
@@ -44,10 +45,13 @@ export async function pipeFile(
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     req.pipe(fs.createWriteStream(filePath));
     req.on("end", () => {
       resolve(true);
+    });
+    req.on("error", (err) => {
+      reject(err);
     });
   });
 }
@@ -98,6 +102,26 @@ export function getFiles(bucket: string) {
   if (!fs.existsSync(bucketPath)) return null;
 
   return fs.readdirSync(bucketPath);
+}
+
+export function getFilesAndStats(bucket: string) {
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  if (!fs.existsSync(bucketPath)) return null;
+
+  const files = fs.readdirSync(bucketPath);
+  const stats = files.map((file) => {
+    const filePath = path.join(bucketPath, file);
+    const stats = fs.statSync(filePath);
+    return {
+      file,
+      mimeType: mime.getType(filePath),
+      size: stats.size,
+      lastModified: stats.mtime.toISOString(),
+    };
+  });
+
+  return stats;
 }
 
 export function getETag(bucket: string, file: string) {

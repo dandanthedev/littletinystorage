@@ -4,3 +4,4 @@ data/
 out
 dist/
 web/
+.env.bak*

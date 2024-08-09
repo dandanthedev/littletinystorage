@@ -10,7 +10,7 @@ export const requestListener = async function (
 ) {
   if (!req.url) return;
   //send files from ./web directory
-  let fileName = req.url.replace("/", "");
+  let fileName = req.url.replace("/", "").split("?")[0];
   if (!fileName) fileName = "index.html";
 
   const exts = ["js", "css", "png"];
