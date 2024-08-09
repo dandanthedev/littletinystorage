@@ -89,10 +89,6 @@ buckets.forEach((bucket) => {
   const bucketPath = path.join(dataDir, bucket);
   if (!fs.existsSync(bucketPath)) {
     fs.mkdirSync(bucketPath);
-    //create __internal__ directory
-    if (!fs.existsSync(path.join(bucketPath, "__internal__"))) {
-      fs.mkdirSync(path.join(bucketPath, "__internal__"));
-    }
   }
 });
 if (process.env.DELETE_BUCKETS_WHEN_ENV_REMOVED === "true") {
