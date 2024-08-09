@@ -11,6 +11,7 @@ import authed from "./authed.js";
 import buckets from "./buckets.js";
 import files from "./files.js";
 import fileStats from "./fileStats.js";
+import getEnv from "./getEnv.js";
 
 import { getURLParam } from "../utils.js";
 
@@ -53,6 +54,10 @@ const authedRoutes = [
   {
     path: "buckets",
     handler: buckets,
+  },
+  {
+    path: "getEnv", //EXTRA REMINDER TO NEVER ALLOW PUBLIC ACCESS TO THIS!!!!
+    handler: getEnv,
   },
 ];
 
