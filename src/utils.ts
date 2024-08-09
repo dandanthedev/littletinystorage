@@ -30,9 +30,7 @@ export function resp(
     typeof body === "object" &&
     !(body instanceof ReadStream)
   ) {
-    console.log(body);
     body = jstoxml.toXML(body);
-    console.log(body);
   }
   if (typeof body === "object" && !(body instanceof ReadStream))
     body = JSON.stringify(body);

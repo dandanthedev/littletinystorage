@@ -92,7 +92,6 @@ export const requestListener = async function (
 
   //custom urls
   const hostname = req.headers.host;
-  console.log(hostname);
 
   if (hostname) {
     for (const bucket of buckets) {

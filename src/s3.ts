@@ -6,12 +6,12 @@ import {
   streamFile,
   getFilesAWS,
   getETag,
+  deleteFile,
 } from "./reader.js";
 export const requestListener = async function (
   req: IncomingMessage,
   res: ServerResponse
 ) {
-  console.log(req.url, req.method, req.headers);
   if (!req.url) return resp(res, 400, "Invalid request");
   const query = req.url.split("?")[1];
   const qParams = new URLSearchParams(query);
@@ -74,8 +74,6 @@ export const requestListener = async function (
     if (!fileName || !contentType)
       return resp(res, 400, "NameOrContentTypeMissing", "awsError");
 
-    console.log("Uploading", fileName, contentType, "to", bucket);
-
     //pipe body to file
     await pipeFile(bucket, fileName, req);
 
@@ -99,8 +97,6 @@ export const requestListener = async function (
     const destKey = getURLParam(req.url, 1, true);
     if (!destKey) return resp(res, 400, "DestinationMissing", "awsError");
 
-    console.log("Copying", sourceBucket, sourceKey, "to", bucket, destKey);
-
     const file = streamFile(sourceBucket, sourceKey);
 
     if (!file) return resp(res, 404, "SourceFileNotFound", "awsError");
@@ -118,6 +114,17 @@ export const requestListener = async function (
       },
       "xml"
     );
+  }
+
+  if (action === "DeleteObject") {
+    if (!bucket) return resp(res, 400, "BucketMissing", "awsError");
+
+    const key = getURLParam(req.url, 1, true);
+    if (!key) return resp(res, 400, "KeyMissing", "awsError");
+
+    deleteFile(bucket, key);
+
+    return resp(res, 204);
   }
 
   return resp(

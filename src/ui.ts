@@ -13,8 +13,6 @@ export const requestListener = async function (
   let fileName = req.url.replace("/", "");
   if (!fileName) fileName = "index.html";
 
-  console.log(fileName);
-
   const exts = ["js", "css", "png"];
 
   if (
