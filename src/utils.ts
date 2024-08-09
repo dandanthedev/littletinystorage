@@ -3,9 +3,10 @@ config();
 
 import { ServerResponse } from "http";
 import { ReadStream } from "fs";
+import jstoxml from "jstoxml";
 
-type ResponseType = "json" | "html" | "file";
-type ResponseBody = string | null | ReadStream;
+type ResponseType = "json" | "html" | "file" | "xml" | "awsError";
+type ResponseBody = string | null | ReadStream | Object;
 
 export function resp(
   res: ServerResponse,
@@ -14,6 +15,23 @@ export function resp(
   type?: ResponseType,
   mimeType?: string
 ) {
+  if (type === "awsError") {
+    type = "xml";
+    body = {
+      Error: {
+        Code: body,
+      },
+    };
+  }
+
+  if (
+    type === "xml" &&
+    body &&
+    typeof body === "object" &&
+    !(body instanceof ReadStream)
+  ) {
+    body = jstoxml.toXML(body);
+  }
   if (typeof body === "object" && !(body instanceof ReadStream))
     body = JSON.stringify(body);
 
@@ -22,7 +40,9 @@ export function resp(
     if (type === "html") res.setHeader("Content-Type", "text/html");
     if (type === "file")
       res.setHeader("Content-Type", "application/octet-stream");
+    if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
+  if (!type) res.setHeader("Content-Type", "text/plain");
   if (mimeType) res.setHeader("Content-Type", mimeType);
   res.writeHead(status);
   if (body instanceof ReadStream) {
@@ -39,12 +59,18 @@ export function envCheck(bucket: string, setting: string) {
   return process.env[env];
 }
 
-export function getURLParam(url: string, key: number) {
+export function getURLParam(url: string, key: number, andAfter?: boolean) {
   const urlParts = url.split("/");
   const part = urlParts[key];
   if (!part) return null;
-  const partParts = part.split("?");
-  return partParts[0];
+
+  if (andAfter) {
+    //add all parts after the key
+    const parts = url.split("/").slice(key);
+    return parts.join("/").split("?")[0];
+  }
+
+  return part.split("?")[0];
 }
 
 export function getQuery(url: string) {
