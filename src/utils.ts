@@ -60,12 +60,18 @@ export function envCheck(bucket: string, setting: string) {
   return process.env[env];
 }
 
-export function getURLParam(url: string, key: number) {
+export function getURLParam(url: string, key: number, andAfter?: boolean) {
   const urlParts = url.split("/");
   const part = urlParts[key];
   if (!part) return null;
-  const partParts = part.split("?");
-  return partParts[0];
+
+  if (andAfter) {
+    //add all parts after the key
+    const parts = url.split("/").slice(key);
+    return parts.join("/").split("?")[0];
+  }
+
+  return part.split("?")[0];
 }
 
 export function getQuery(url: string) {

@@ -1,21 +1,11 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { resp, buckets } from "./utils.js";
-import { getFilesAWS } from "./reader.js";
+import { resp, buckets, getURLParam } from "./utils.js";
+import { getFilesAWS, pipeFile } from "./reader.js";
 export const requestListener = async function (
   req: IncomingMessage,
   res: ServerResponse
 ) {
-  //get body
-  const body = await new Promise((resolve) => {
-    let body = "";
-    req.on("data", (chunk) => {
-      body += chunk;
-    });
-    req.on("end", () => {
-      resolve(body);
-    });
-  });
-  console.log(req.url, req.method, req.headers, body);
+  console.log(req.url, req.method, req.headers);
   if (!req.url) return resp(res, 400, "Invalid request");
   const query = req.url.split("?")[1];
   const qParams = new URLSearchParams(query);
@@ -68,6 +58,22 @@ export const requestListener = async function (
       `,
       "xml"
     );
+  }
+
+  if (action === "PutObject") {
+    if (!bucket) return resp(res, 400, "BucketMissing", "awsError");
+
+    const fileName = getURLParam(req.url, 1, true);
+    const contentType = req.headers["content-type"];
+    if (!fileName || !contentType)
+      return resp(res, 400, "NameOrContentTypeMissing", "awsError");
+
+    console.log("Uploading", fileName, contentType, "to", bucket);
+
+    //pipe body to file
+    await pipeFile(bucket, fileName, req);
+
+    return resp(res, 200);
   }
 
   return resp(

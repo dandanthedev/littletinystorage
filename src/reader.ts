@@ -3,6 +3,7 @@ import * as path from "path";
 import { config } from "dotenv";
 import * as crypto from "crypto";
 import jstoxml from "jstoxml";
+import { IncomingMessage } from "http";
 
 config();
 
@@ -31,6 +32,24 @@ export function getFile(bucket: string, file: string) {
   if (!fs.existsSync(filePath)) return null;
 
   return fs.readFileSync(filePath);
+}
+
+export async function pipeFile(
+  bucket: string,
+  file: string,
+  req: IncomingMessage
+) {
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  const filePath = path.join(bucketPath, safeFile);
+
+  return new Promise((resolve) => {
+    req.pipe(fs.createWriteStream(filePath));
+    req.on("end", () => {
+      resolve(true);
+    });
+  });
 }
 
 export const streamFile = (bucket: string, file: string) => {
