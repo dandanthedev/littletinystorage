@@ -23,6 +23,7 @@ A Little Tiny (S3 compatible) file storage server
 ## Setup
 
 The easiest way to get started is downloading the latest release from the [releases page](https://github.com/dandanthedev/LittleTinyStorage/releases).
+Alternatively, you can use the [docker image](https://github.com/dandanthedev/littletinystorage/pkgs/container/littletinystorage)
 
 If you want to build it yourself, follow these steps:
 
@@ -31,7 +32,7 @@ If you want to build it yourself, follow these steps:
 3. Fill in the .env file with your own settings
 4. Run `npm install`
 5. Run `node index.js`
-6. LittleTinyStorage is now running on port 7999! (unless another port is specified in the .env file)
+6. LittleTinyStorage is now running on port 7999, 7998 and 7997! (unless other ports are specified in the .env file)
 
 ## S3 Compatibility
 
