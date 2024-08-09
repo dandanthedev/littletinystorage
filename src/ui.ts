@@ -21,8 +21,9 @@ export const requestListener = async function (
     !exts.map((ext) => fileName.endsWith("." + ext)).includes(true) //most cursed thing i've ever seen but it works
   ) {
     fileName = fileName + ".html";
-    if (!fs.existsSync(path.join("./web", fileName))) return resp(res, 404);
   }
+
+  if (!fs.existsSync(path.join("./web", fileName))) return resp(res, 404);
 
   if (fileName) {
     const file = fs.createReadStream(path.join("./web", fileName));
