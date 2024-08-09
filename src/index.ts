@@ -110,5 +110,6 @@ const uiPort = parseInt(process.env.UI_PORT ?? "7998");
 const s3Port = parseInt(process.env.S3_PORT ?? "7997");
 
 createServer(requestListener, port, "LTS");
-createServer(uiRequestListener, uiPort, "WebUI");
+if (process.env.ENABLE_WEBUI === "true")
+  createServer(uiRequestListener, uiPort, "WebUI");
 createServer(s3RequestListener, s3Port, "S3 API");
