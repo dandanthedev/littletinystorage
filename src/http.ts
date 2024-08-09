@@ -197,7 +197,7 @@ export const requestListener = async function (
       return resp(res, 200, foundFile, "file");
     }
     if (type === "upload") {
-      pipeFile(bucket, file, req);
+     await pipeFile(bucket, file, req);
       return resp(res, 200);
     }
     if (type === "delete") {
