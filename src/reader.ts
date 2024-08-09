@@ -10,9 +10,18 @@ if (!process.env.DATA_DIR || process.env.DATA_DIR === "") {
   console.warn("DATA_DIR is not set, using default ./data");
 } else dataDir = process.env.DATA_DIR;
 
+function removeDirectoryChanges(dir: string) {
+  //TODO: test this a lot :D
+  //if it contains ../ or ./ then remove it
+  if (dir.includes("../")) dir = dir.replaceAll("../", "");
+  if (dir.includes("./")) dir = dir.replaceAll("./", "");
+
+  return dir;
+}
+
 export function getFile(bucket: string, file: string) {
-  const safeFile = path.normalize(file);
-  const safeBucket = path.normalize(bucket);
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
@@ -22,8 +31,8 @@ export function getFile(bucket: string, file: string) {
 }
 
 export const streamFile = (bucket: string, file: string) => {
-  const safeFile = path.normalize(file);
-  const safeBucket = path.normalize(bucket);
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
@@ -33,8 +42,8 @@ export const streamFile = (bucket: string, file: string) => {
 };
 
 export const deleteFile = (bucket: string, file: string) => {
-  const safeFile = path.normalize(file);
-  const safeBucket = path.normalize(bucket);
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
@@ -44,8 +53,8 @@ export const deleteFile = (bucket: string, file: string) => {
 };
 
 export const uploadFile = (bucket: string, file: string, data: Buffer) => {
-  const safeFile = path.normalize(file);
-  const safeBucket = path.normalize(bucket);
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
@@ -55,7 +64,7 @@ export const uploadFile = (bucket: string, file: string, data: Buffer) => {
 };
 
 export function getFiles(bucket: string) {
-  const safeBucket = path.normalize(bucket);
+  const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
   if (!fs.existsSync(bucketPath)) return null;
 
