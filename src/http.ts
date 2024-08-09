@@ -9,7 +9,7 @@ import * as path from "path";
 import { IncomingMessage, ServerResponse } from "http";
 import { verifyToken } from "./jwt.js";
 import * as http from "http";
-import { deleteFile, streamFile, uploadFile, moveFile } from "./reader.js";
+import { deleteFile, streamFile, moveFile, pipeFile } from "./reader.js";
 
 //TODO: find a better way to do this + make it editable by user
 const directoryTemplate = `
@@ -195,16 +195,7 @@ export const requestListener = async function (
       return resp(res, 200, foundFile, "file");
     }
     if (type === "upload") {
-      const data: Buffer = await new Promise((resolve) => {
-        const chunks: Buffer[] = [];
-        req.on("data", (chunk) => {
-          chunks.push(chunk);
-        });
-        req.on("end", () => {
-          resolve(Buffer.concat(chunks));
-        });
-      });
-      uploadFile(bucket, file, data);
+      pipeFile(bucket, file, req);
       return resp(res, 200);
     }
     if (type === "delete") {

@@ -74,17 +74,6 @@ export const deleteFile = (bucket: string, file: string) => {
   fs.unlinkSync(filePath);
 };
 
-export const uploadFile = (bucket: string, file: string, data: Buffer) => {
-  const safeFile = removeDirectoryChanges(file);
-  const safeBucket = removeDirectoryChanges(bucket);
-  const bucketPath = path.join(dataDir, safeBucket);
-  const filePath = path.join(bucketPath, safeFile);
-
-  if (!fs.existsSync(bucketPath)) fs.mkdirSync(bucketPath);
-
-  fs.writeFileSync(filePath, data);
-};
-
 export function getFiles(bucket: string) {
   const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
