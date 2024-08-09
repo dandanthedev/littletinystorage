@@ -89,10 +89,6 @@ buckets.forEach((bucket) => {
   const bucketPath = path.join(dataDir, bucket);
   if (!fs.existsSync(bucketPath)) {
     fs.mkdirSync(bucketPath);
-    //create __internal__ directory
-    if (!fs.existsSync(path.join(bucketPath, "__internal__"))) {
-      fs.mkdirSync(path.join(bucketPath, "__internal__"));
-    }
   }
 });
 if (process.env.DELETE_BUCKETS_WHEN_ENV_REMOVED === "true") {
@@ -110,5 +106,6 @@ const uiPort = parseInt(process.env.UI_PORT ?? "7998");
 const s3Port = parseInt(process.env.S3_PORT ?? "7997");
 
 createServer(requestListener, port, "LTS");
-createServer(uiRequestListener, uiPort, "WebUI");
+if (process.env.ENABLE_WEBUI === "true")
+  createServer(uiRequestListener, uiPort, "WebUI");
 createServer(s3RequestListener, s3Port, "S3 API");
