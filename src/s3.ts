@@ -1,3 +1,6 @@
+import { config } from "dotenv";
+config();
+
 import { IncomingMessage, ServerResponse } from "http";
 import { resp, buckets, getURLParam } from "./utils.js";
 import {
@@ -17,6 +20,17 @@ export const requestListener = async function (
   const qParams = new URLSearchParams(query);
   const bucket = qParams.get("bucket") || req.headers.host?.split(".")[0];
   const action = qParams.get("x-id") || req.url.split("/")[1].split("?")[0];
+
+  const authorization = req.headers.authorization;
+
+  if (!authorization) return resp(res, 401, "AuthorizationMissing", "awsError");
+
+  const credential = authorization.split("Credential=")[1];
+  if (!credential) return resp(res, 401, "CredentialMissing", "awsError");
+  const endCredential = credential.split("/")[0];
+
+  if (process.env.S3_KEY_SECRET !== endCredential)
+    return resp(res, 401, "CredentialNotValid", "awsError");
 
   if (action === "ListBuckets") {
     return resp(
