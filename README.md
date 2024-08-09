@@ -3,7 +3,7 @@
 
 # LittleTinyStorage
 
-A little tiny file storage server, for the people that use S3 when they really don't need it.
+A little tiny (s3 compatible) file storage server
 
 > Note: This project is still in early development. It should be fully functional, but there might be bugs. If you find any, please report them!
 > Note 2: S3 compatibility is not yet implemented but very much at the top of our roadmap :D!
@@ -15,7 +15,7 @@ A little tiny file storage server, for the people that use S3 when they really d
 - Get, upload, delete and rename files (across buckets!)
 - Upload using presigned URLs
 - Download using presigned URLs (private buckets)
-- Stores files as, well... files!
+- Store files as, well... files!
 - Directory listings
 - Store on your own server
 - Completely configured using environment variables
@@ -33,6 +33,24 @@ If you want to build it yourself, follow these steps:
 4. Run `npm install`
 5. Run `node index.js`
 6. LittleTinyStorage is now running on port 7999! (unless another port is specified in the .env file)
+
+## S3 Compatibility
+
+LittleTinyStorage is partially compatible with S3 clients. Here's a list of the commands that are currently implemented:
+
+- ListBuckets
+- ListObjects(V2)
+- PutObject
+- CopyObject
+- DeleteObject
+
+As you can see, signed URLs are not yet supported. I'd recommend using the LTS api for this for now, as it's much easier to use.
+
+### Authentication
+
+I've not managed to get normal S3 authentication to work yet, so I'm using a different method for now:
+
+The `S3_KEY_SECRET` environment variable is the accessKeyId. The secret key is not used, but can be anything. This will be fixed in the future.
 
 ## Usage
 
