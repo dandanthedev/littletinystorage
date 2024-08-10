@@ -42,6 +42,7 @@ export function resp(
       res.setHeader("Content-Type", "application/octet-stream");
     if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
+
   if (!type) res.setHeader("Content-Type", "text/plain");
   if (mimeType) res.setHeader("Content-Type", mimeType);
   res.writeHead(status);
@@ -60,17 +61,18 @@ export function envCheck(bucket: string, setting: string) {
 }
 
 export function getURLParam(url: string, key: number, andAfter?: boolean) {
-  const urlParts = url.split("/");
+  let urlParts = url.split("/");
+
   const part = urlParts[key];
   if (!part) return null;
 
   if (andAfter) {
     //add all parts after the key
     const parts = url.split("/").slice(key);
-    return parts.join("/").split("?")[0];
+    return decodeURIComponent(parts.join("/").split("?")[0]);
   }
 
-  return part.split("?")[0];
+  return decodeURIComponent(part.split("?")[0]);
 }
 
 export function getQuery(url: string) {

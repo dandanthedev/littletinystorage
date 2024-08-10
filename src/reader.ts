@@ -94,6 +94,8 @@ export const deleteFile = (bucket: string, file: string) => {
   if (!fs.existsSync(filePath)) return null;
 
   fs.unlinkSync(filePath);
+
+  return true;
 };
 
 export function getFiles(bucket: string) {
@@ -104,6 +106,24 @@ export function getFiles(bucket: string) {
   return fs.readdirSync(bucketPath);
 }
 
+export function getFileStats(bucket: string, file: string) {
+  const safeFile = removeDirectoryChanges(file);
+  const safeBucket = removeDirectoryChanges(bucket);
+  const bucketPath = path.join(dataDir, safeBucket);
+  const filePath = path.join(bucketPath, safeFile);
+
+  if (!fs.existsSync(filePath)) return null;
+
+  const stats = fs.statSync(filePath);
+
+  return {
+    file,
+    mimeType: mime.getType(filePath),
+    size: stats.size,
+    lastModified: stats.mtime.toISOString(),
+  };
+}
+
 export function getFilesAndStats(bucket: string) {
   const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
@@ -111,14 +131,8 @@ export function getFilesAndStats(bucket: string) {
 
   const files = fs.readdirSync(bucketPath);
   const stats = files.map((file) => {
-    const filePath = path.join(bucketPath, file);
-    const stats = fs.statSync(filePath);
-    return {
-      file,
-      mimeType: mime.getType(filePath),
-      size: stats.size,
-      lastModified: stats.mtime.toISOString(),
-    };
+    const stats = getFileStats(bucket, file);
+    return stats;
   });
 
   return stats;
@@ -145,10 +159,7 @@ export function getFilesAWS(bucket: string) {
   const filesAWS = files.map((file) => {
     const filePath = path.join(bucketPath, file);
     const stats = fs.statSync(filePath);
-    const etag = crypto
-      .createHash("md5")
-      .update(stats.size.toString())
-      .digest("hex");
+    const etag = getETag(bucket, file);
     return jstoxml.toXML({
       Contents: {
         ETag: etag,
