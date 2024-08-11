@@ -78,8 +78,8 @@ export async function pipeFileStream(
 export const streamFile = (
   bucket: string,
   file: string,
-  req: IncomingMessage,
-  res: ServerResponse
+  req?: IncomingMessage,
+  res?: ServerResponse
 ) => {
   const safeFile = removeDirectoryChanges(file);
   const safeBucket = removeDirectoryChanges(bucket);
@@ -90,13 +90,17 @@ export const streamFile = (
 
   const fileStats = getFileStats(bucket, file);
 
-  if (!fileStats) return resp(res, 404);
+  if (!fileStats) {
+    if (res) return resp(res, 404);
+    else return null;
+  }
 
   let start: string | number = 0;
   let end: string | number = fileStats.size - 1;
 
-  const range = req.headers.range;
+  const range = req?.headers.range;
   if (range) {
+    if (!res) throw new Error("Range requested but no response provided");
     start = range.replace("bytes=", "").split("-")[0];
     end = range.replace("bytes=", "").split("-")[1];
     start = start ? parseInt(start, 10) : 0;
