@@ -21,11 +21,13 @@
     "build": "npm run tsc && npm run build:windows && npm run build:linux && npm run build:macos-x64 && npm run build:macos-arm64",
     "tsc": "tsc",
     "start": "npm run tsc && node dist/index.js",
-    "test": "npm run tsc && node test.js"
+    "test": "npm run tsc && node test.js",
+    "dev": "nodemon --watch src --ext ts --exec npm run start"
   },
   "devDependencies": {
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^22.1.0",
-    "@types/yauzl": "^2.10.3"
+    "@types/yauzl": "^2.10.3",
+    "nodemon": "^3.1.4"
   }
 }

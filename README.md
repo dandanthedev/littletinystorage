@@ -57,6 +57,20 @@ The `S3_KEY_SECRET` environment variable is the accessKeyId. The secret key is n
 LittleTinyStorage is a REST API. You can use it with any HTTP client, like Postman or cURL.
 The API does not use JSON, but returns data in plaintext.
 
+## HEAD
+
+The HEAD method is used to get the file size without downloading the file. This can be useful for checking if a file exists or is accessible without downloading it.
+
+```
+HEAD /:bucket/:file
+```
+
+Example:
+
+```
+HEAD /mybucket/myfile.txt
+```
+
 ## Get a file
 
 ```
@@ -185,7 +199,7 @@ This endpoint will return the decoded token if the token is valid. The values ma
 > Note: These details are also returned in the response header when running operations on a file using a token.
 
 ```
-GET /api/:bucket/checkToken?token={TOKEN}
+GET /api/:bucket/token?token={TOKEN}
 ```
 
 Example:
@@ -212,16 +226,16 @@ All fields are optional, and will count as wildcards if not specified.
 | delete   | DELETE     |
 
 ```
-GET /api/:bucket/generateToken?file={FILE}&type={TYPE}&expiresIn={EXPIRESIN}
+POST /api/:bucket/token?file={FILE}&type={TYPE}&expiresIn={EXPIRESIN}
 ```
 
 Example:
 
 ```
-GET /api/bucket1/generateToken?file=taxfraud.txt&type=download&expiresIn=60s
-GET /api/bucket1/generateToken?file=taxfraud.txt
-GET /api/bucket1/generateToken?type=rename
-GET /api/bucket1/generateToken?expiresIn=60y
+POST /api/bucket1/token?file=taxfraud.txt&type=download&expiresIn=60s
+POST /api/bucket1/token?file=taxfraud.txt
+POST /api/bucket1/token?type=rename
+POST /api/bucket1/token?expiresIn=60y
 ```
 
 ## Get a list of files
@@ -268,7 +282,35 @@ Example:
 This endpoint will return the current configuration of the server.
 
 ```
-GET /api/getEnv
+GET /api/env
+```
+
+Example:
+
+```
+{
+    "envType": "file | env",
+    "env": [
+        {
+            "key": "HEYA",
+            "value": "true",
+            "comment": "Used to check if the .env file is loaded, THIS IS REQUIRED!"
+        },
+        {
+            "key": "PORT",
+            "value": "7999",
+            "comment": "The port LTS runs on."
+        },
+	]
+}
+```
+
+### Set the current configuration
+
+This endpoint will set the current configuration of the server.
+
+```
+POST /api/env
 ```
 
 Example:

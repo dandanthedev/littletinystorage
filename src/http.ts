@@ -9,7 +9,13 @@ import * as path from "path";
 import { IncomingMessage, ServerResponse } from "http";
 import { verifyToken } from "./jwt.js";
 import * as http from "http";
-import { deleteFile, streamFile, moveFile, pipeFile } from "./reader.js";
+import {
+  deleteFile,
+  streamFile,
+  moveFile,
+  pipeFile,
+  getFileStats,
+} from "./reader.js";
 
 //TODO: find a better way to do this + make it editable by user
 const directoryTemplate = `
@@ -110,9 +116,16 @@ export const requestListener = async function (
         );
         if (canAccess !== true) return resp(res, 401, canAccess);
 
-        const foundFile = streamFile(bucket, file);
-        if (!foundFile) return resp(res, 404);
-        return resp(res, 200, foundFile, "file");
+        if (req.method === "HEAD") {
+          const stats = getFileStats(bucket, file);
+          if (!stats) return resp(res, 404);
+          res.setHeader("Content-Length", stats.size);
+          return resp(res, 204);
+        } else if (req.method === "GET") {
+          const foundFile = streamFile(bucket, file);
+          if (!foundFile) return resp(res, 404);
+          return resp(res, 200, foundFile, "file");
+        } else return resp(res, 400, "Invalid method");
       }
     }
   }
@@ -172,16 +185,25 @@ export const requestListener = async function (
     else if (req.method === "POST") type = "upload";
     else if (req.method === "DELETE") type = "delete";
     else if (req.method === "PUT") type = "rename";
+    else if (req.method === "HEAD") type = "head";
     else return resp(res, 400, "Invalid method");
 
     if (
-      (await canAccessFile(bucket, null, file, "download", res)) &&
-      type === "download"
+      ((await canAccessFile(bucket, null, file, "download", res)) &&
+        type === "download") ||
+      type === "head"
     ) {
-      //if accessible without authentication
-      const foundFile = streamFile(bucket, file);
-      if (!foundFile) return resp(res, 404);
-      return resp(res, 200, foundFile, "file");
+      if (req.method === "HEAD") {
+        const stats = getFileStats(bucket, file);
+        if (!stats) return resp(res, 404);
+        res.setHeader("Content-Length", stats.size);
+        return resp(res, 204);
+      } else if (req.method === "GET") {
+        //if accessible without authentication
+        const foundFile = streamFile(bucket, file);
+        if (!foundFile) return resp(res, 404);
+        return resp(res, 200, foundFile, "file");
+      }
     }
 
     const key = params.get("key");
@@ -191,13 +213,20 @@ export const requestListener = async function (
     const canAccess = await canAccessFile(bucket, key, file, type, res);
     if (canAccess !== true) return resp(res, 401, canAccess);
 
+    if (type === "head") {
+      const stats = getFileStats(bucket, file);
+      if (!stats) return resp(res, 404);
+      res.setHeader("Content-Length", stats.size);
+      return resp(res, 204);
+    }
+
     if (type === "download") {
       const foundFile = streamFile(bucket, file);
       if (!foundFile) return resp(res, 404);
       return resp(res, 200, foundFile, "file");
     }
     if (type === "upload") {
-     await pipeFile(bucket, file, req);
+      await pipeFile(bucket, file, req);
       return resp(res, 200);
     }
     if (type === "delete") {
