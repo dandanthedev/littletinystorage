@@ -42,6 +42,8 @@ export function resp(
     res.end(body);
   } else if (body && "pipe" in body && typeof body.pipe === "function") {
     body.pipe(res);
+  } else {
+    res.end();
   }
 }
 
