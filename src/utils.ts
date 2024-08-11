@@ -40,6 +40,7 @@ export function resp(
     res.writeHead(status);
     res.end(body);
   } else if (body && "pipe" in body && typeof body.pipe === "function") {
+    res.writeHead(status);
     body.pipe(res);
   }
 }

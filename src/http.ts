@@ -130,7 +130,7 @@ export const requestListener = async function (
           res.setHeader("Content-Length", stats.size);
           return resp(res, 204);
         } else if (req.method === "GET") {
-          const foundFile = streamFile(bucket, file);
+          const foundFile = streamFile(bucket, file, req);
           if (!foundFile) return resp(res, 404);
           return resp(res, 200, foundFile, "file");
         } else return resp(res, 400, "Invalid method");
@@ -209,9 +209,51 @@ export const requestListener = async function (
     }
 
     if (type === "download") {
-      const foundFile = streamFile(bucket, file, req);
+      const fileStats = getFileStats(bucket, file);
+
+      if (!fileStats) return resp(res, 404);
+
+      let start: string | number = 0;
+      let end: string | number = fileStats.size - 1;
+
+      const range = req.headers.range;
+      if (range) {
+        start = range.replace("bytes=", "").split("-")[0];
+        end = range.replace("bytes=", "").split("-")[1];
+        start = start ? parseInt(start, 10) : 0;
+        end = end ? parseInt(end, 10) : fileStats.size - 1;
+
+        if (!isNaN(start) && isNaN(end)) {
+          start = start;
+          end = fileStats.size - 1;
+        }
+
+        if (isNaN(start) && !isNaN(end)) {
+          start = fileStats.size - end;
+          end = fileStats.size - 1;
+        }
+
+        if (start >= fileStats.size || end >= fileStats.size) {
+          return resp(res, 416, "Invalid range");
+        }
+
+        res.writeHead(206, {
+          "Content-Range": `bytes ${start}-${end}/${fileStats.size}`,
+          "Accept-Ranges": "bytes",
+          "Content-Length": `${end - start + 1}`,
+          "Content-Type": fileStats.mimeType ?? "application/octet-stream",
+        });
+      }
+
+      const foundFile = streamFile(bucket, file, req, start, end);
       if (!foundFile) return resp(res, 404);
-      return resp(res, 200, foundFile, "file");
+
+      return resp(
+        res,
+        start !== 0 || end !== fileStats.size ? 206 : 200,
+        foundFile,
+        "file"
+      );
     }
     if (type === "upload") {
       await pipeFile(bucket, file, req);

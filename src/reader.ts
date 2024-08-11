@@ -77,7 +77,9 @@ export async function pipeFileStream(
 export const streamFile = (
   bucket: string,
   file: string,
-  req?: IncomingMessage
+  req?: IncomingMessage,
+  start?: number,
+  end?: number
 ) => {
   const safeFile = removeDirectoryChanges(file);
   const safeBucket = removeDirectoryChanges(bucket);
@@ -86,8 +88,18 @@ export const streamFile = (
 
   if (!fs.existsSync(filePath)) return null;
 
-  const stream: fs.ReadStream = send.default(req, filePath);
-  return stream;
+  console.log(start, end);
+
+  return fs.createReadStream(filePath, {
+    //handle content-range
+    start,
+    end,
+
+    highWaterMark: 1024 * 1024 * 10,
+  });
+
+  // const stream: fs.ReadStream = send.default(req, filePath);
+  // return stream;
 };
 
 export const deleteFile = (bucket: string, file: string) => {
