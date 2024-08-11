@@ -118,7 +118,7 @@ export const streamFile = (
     }
 
     if (start >= fileStats.size || end >= fileStats.size) {
-      return null;
+      return "Range not satisfiable";
     }
 
     res.writeHead(206, {

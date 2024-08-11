@@ -132,6 +132,7 @@ export const requestListener = async function (
         } else if (req.method === "GET") {
           const foundFile = streamFile(bucket, file, req, res);
           if (!foundFile) return resp(res, 404);
+          if (typeof foundFile === "string") return resp(res, 216, foundFile);
           return resp(res, undefined, foundFile, "file");
         } else return resp(res, 400, "Invalid method");
       }
@@ -210,7 +211,9 @@ export const requestListener = async function (
 
     if (type === "download") {
       const foundFile = streamFile(bucket, file, req, res);
+
       if (!foundFile) return resp(res, 404);
+      if (typeof foundFile === "string") return resp(res, 216, foundFile);
 
       return resp(res, undefined, foundFile, "file");
     }
