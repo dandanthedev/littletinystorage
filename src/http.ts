@@ -61,7 +61,7 @@ async function canAccessFile(
       res.setHeader("Token-DownloadAs", decoded.downloadAs ?? "any");
       if (type === "download")
         res.setHeader(
-          "ResponseContentDisposition",
+          "Content-Disposition",
           `attachment; filename="${decoded.downloadAs}"`
         );
     }
