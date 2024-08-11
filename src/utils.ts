@@ -6,7 +6,7 @@ import { ReadStream } from "fs";
 import jstoxml from "jstoxml";
 
 type ResponseType = "json" | "html" | "file" | "xml" | "awsError";
-type ResponseBody = string | null | ReadStream | Object;
+type ResponseBody = string | null | Object;
 
 export function resp(
   res: ServerResponse,
@@ -24,32 +24,23 @@ export function resp(
     };
   }
 
-  if (
-    type === "xml" &&
-    body &&
-    typeof body === "object" &&
-    !(body instanceof ReadStream)
-  ) {
+  if (type === "xml" && body && typeof body === "object") {
     body = jstoxml.toXML(body);
   }
-  if (typeof body === "object" && !(body instanceof ReadStream))
-    body = JSON.stringify(body);
+  if (typeof body === "object" && type === "json") body = JSON.stringify(body);
 
   if (type && !mimeType) {
     if (type === "json") res.setHeader("Content-Type", "application/json");
     if (type === "html") res.setHeader("Content-Type", "text/html");
-    if (type === "file")
-      res.setHeader("Content-Type", "application/octet-stream");
     if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
 
   if (!type) res.setHeader("Content-Type", "text/plain");
-  if (mimeType) res.setHeader("Content-Type", mimeType);
-  res.writeHead(status);
-  if (body instanceof ReadStream) {
-    body.pipe(res);
-  } else {
+  if (typeof body === "string") {
+    res.writeHead(status);
     res.end(body);
+  } else if (body && "pipe" in body && typeof body.pipe === "function") {
+    body.pipe(res);
   }
 }
 
