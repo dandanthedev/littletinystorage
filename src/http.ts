@@ -57,6 +57,14 @@ async function canAccessFile(
     if (timeLeft) res.setHeader("Token-ExpiresIn", timeLeft ?? "never");
     if (decoded?.file) res.setHeader("Token-File", decoded.file ?? "any");
     if (decoded?.type) res.setHeader("Token-Type", decoded.type ?? "any");
+    if (decoded?.downloadAs) {
+      res.setHeader("Token-DownloadAs", decoded.downloadAs ?? "any");
+      if (type === "download")
+        res.setHeader(
+          "ResponseContentDisposition",
+          `attachment; filename="${decoded.downloadAs}"`
+        );
+    }
   }
 
   return true;
@@ -188,27 +196,7 @@ export const requestListener = async function (
     else if (req.method === "HEAD") type = "head";
     else return resp(res, 400, "Invalid method");
 
-    if (
-      ((await canAccessFile(bucket, null, file, "download", res)) === true &&
-        type === "download") ||
-      type === "head"
-    ) {
-      if (req.method === "HEAD") {
-        const stats = getFileStats(bucket, file);
-        if (!stats) return resp(res, 404);
-        res.setHeader("Content-Length", stats.size);
-        return resp(res, 204);
-      } else if (req.method === "GET") {
-        //if accessible without authentication
-        const foundFile = streamFile(bucket, file);
-        if (!foundFile) return resp(res, 404);
-        return resp(res, 200, foundFile, "file");
-      }
-    }
-
     const key = params.get("key");
-
-    if (!key) return resp(res, 401, "Key required");
 
     const canAccess = await canAccessFile(bucket, key, file, type, res);
     if (canAccess !== true) return resp(res, 401, canAccess);

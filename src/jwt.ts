@@ -8,13 +8,15 @@ export async function generateSignedToken(
   bucket: string | null,
   file: string | null,
   type: string | null,
-  expiry?: string | number | null
+  expiry?: string | number | null,
+  downloadAs?: string | null
 ) {
   try {
     const token = new jose.SignJWT({
       bucket,
       file,
       type,
+      downloadAs,
     });
     token.setExpirationTime(expiry ?? "60s");
     token.setProtectedHeader({
