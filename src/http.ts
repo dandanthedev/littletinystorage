@@ -57,6 +57,14 @@ async function canAccessFile(
     if (timeLeft) res.setHeader("Token-ExpiresIn", timeLeft ?? "never");
     if (decoded?.file) res.setHeader("Token-File", decoded.file ?? "any");
     if (decoded?.type) res.setHeader("Token-Type", decoded.type ?? "any");
+    if (decoded?.downloadAs) {
+      res.setHeader("Token-DownloadAs", decoded.downloadAs ?? "any");
+      if (type === "download")
+        res.setHeader(
+          "ResponseContentDisposition",
+          `attachment; filename="${decoded.downloadAs}"`
+        );
+    }
   }
 
   return true;
