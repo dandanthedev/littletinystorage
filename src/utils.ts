@@ -35,9 +35,10 @@ export function resp(
     if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
 
+  if (!type) res.setHeader("Content-Type", "text/plain");
+
   if (status) res.writeHead(status);
 
-  if (!type) res.setHeader("Content-Type", "text/plain");
   if (typeof body === "string") {
     res.end(body);
   } else if (body && "pipe" in body && typeof body.pipe === "function") {
