@@ -5,7 +5,7 @@ import * as crypto from "crypto";
 import jstoxml from "jstoxml";
 import { IncomingMessage } from "http";
 import mime from "mime";
-
+import * as send from "send";
 config();
 
 let dataDir: string;
@@ -74,7 +74,11 @@ export async function pipeFileStream(
   });
 }
 
-export const streamFile = (bucket: string, file: string) => {
+export const streamFile = (
+  bucket: string,
+  file: string,
+  req?: IncomingMessage
+) => {
   const safeFile = removeDirectoryChanges(file);
   const safeBucket = removeDirectoryChanges(bucket);
   const bucketPath = path.join(dataDir, safeBucket);
@@ -82,7 +86,8 @@ export const streamFile = (bucket: string, file: string) => {
 
   if (!fs.existsSync(filePath)) return null;
 
-  return fs.createReadStream(filePath);
+  const stream: fs.ReadStream = send.default(req, filePath);
+  return stream;
 };
 
 export const deleteFile = (bucket: string, file: string) => {

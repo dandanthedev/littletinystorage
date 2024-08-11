@@ -209,7 +209,7 @@ export const requestListener = async function (
     }
 
     if (type === "download") {
-      const foundFile = streamFile(bucket, file);
+      const foundFile = streamFile(bucket, file, req);
       if (!foundFile) return resp(res, 404);
       return resp(res, 200, foundFile, "file");
     }
