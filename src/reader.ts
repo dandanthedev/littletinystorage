@@ -3,7 +3,8 @@ import * as path from "path";
 import { config } from "dotenv";
 import * as crypto from "crypto";
 import jstoxml from "jstoxml";
-import { IncomingMessage } from "http";
+import { IncomingMessage, ServerResponse } from "http";
+import { resp } from "./utils.js";
 import mime from "mime";
 import * as send from "send";
 config();
@@ -77,7 +78,8 @@ export async function pipeFileStream(
 export const streamFile = (
   bucket: string,
   file: string,
-  req?: IncomingMessage
+  req: IncomingMessage,
+  res: ServerResponse
 ) => {
   const safeFile = removeDirectoryChanges(file);
   const safeBucket = removeDirectoryChanges(bucket);
@@ -86,8 +88,52 @@ export const streamFile = (
 
   if (!fs.existsSync(filePath)) return null;
 
-  const stream: fs.ReadStream = send.default(req, filePath);
-  return stream;
+  const fileStats = getFileStats(bucket, file);
+
+  if (!fileStats) return resp(res, 404);
+
+  let start: string | number = 0;
+  let end: string | number = fileStats.size - 1;
+
+  const range = req.headers.range;
+  if (range) {
+    start = range.replace("bytes=", "").split("-")[0];
+    end = range.replace("bytes=", "").split("-")[1];
+    start = start ? parseInt(start, 10) : 0;
+    end = end ? parseInt(end, 10) : fileStats.size - 1;
+
+    if (!isNaN(start) && isNaN(end)) {
+      start = start;
+      end = fileStats.size - 1;
+    }
+
+    if (isNaN(start) && !isNaN(end)) {
+      start = fileStats.size - end;
+      end = fileStats.size - 1;
+    }
+
+    if (start >= fileStats.size || end >= fileStats.size) {
+      return resp(res, 416, "Invalid range");
+    }
+
+    res.writeHead(206, {
+      "Content-Range": `bytes ${start}-${end}/${fileStats.size}`,
+      "Accept-Ranges": "bytes",
+      "Content-Length": `${end - start + 1}`,
+      "Content-Type": fileStats.mimeType ?? "application/octet-stream",
+    });
+  }
+
+  return fs.createReadStream(filePath, {
+    //handle content-range
+    start,
+    end,
+
+    highWaterMark: 1024 * 1024 * 10,
+  });
+
+  // const stream: fs.ReadStream = send.default(req, filePath);
+  // return stream;
 };
 
 export const deleteFile = (bucket: string, file: string) => {
