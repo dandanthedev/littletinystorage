@@ -1,6 +1,6 @@
 import { IncomingMessage } from "http";
 import { ExtraInfo } from ".";
-import { getFiles } from "../reader.js";
+import { getFiles, getFilesAndStats } from "../reader.js";
 export default async function handle(
   req: IncomingMessage,
   res: any,
@@ -8,7 +8,15 @@ export default async function handle(
   resp: Function,
   extra: ExtraInfo
 ) {
-  const files = getFiles(extra.bucket);
+  const stats = params.get("metadata") === "true";
 
-  return resp(res, 200, files);
+  if (!stats) {
+    const files = getFiles(extra.bucket);
+
+    return resp(res, 200, files);
+  } else {
+    const files = getFilesAndStats(extra.bucket);
+
+    return resp(res, 200, files);
+  }
 }
