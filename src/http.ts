@@ -189,7 +189,7 @@ export const requestListener = async function (
     else return resp(res, 400, "Invalid method");
 
     if (
-      ((await canAccessFile(bucket, null, file, "download", res)) &&
+      ((await canAccessFile(bucket, null, file, "download", res)) === true &&
         type === "download") ||
       type === "head"
     ) {
