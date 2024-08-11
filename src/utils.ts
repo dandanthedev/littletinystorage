@@ -10,7 +10,7 @@ type ResponseBody = string | null | Object;
 
 export function resp(
   res: ServerResponse,
-  status: number,
+  status?: number,
   body?: ResponseBody,
   type?: ResponseType,
   mimeType?: string
@@ -35,12 +35,12 @@ export function resp(
     if (type === "xml") res.setHeader("Content-Type", "text/xml");
   }
 
+  if (status) res.writeHead(status);
+
   if (!type) res.setHeader("Content-Type", "text/plain");
   if (typeof body === "string") {
-    res.writeHead(status);
     res.end(body);
   } else if (body && "pipe" in body && typeof body.pipe === "function") {
-    res.writeHead(status);
     body.pipe(res);
   }
 }
