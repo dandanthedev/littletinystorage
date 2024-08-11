@@ -139,13 +139,13 @@ export const requestListener = async function (
     }
   }
 
+  if (req.url === "/")
+    return resp(res, 200, process.env.WELCOME_MESSAGE ?? "LittleTinyStorage");
+
   if (req?.url && req.url.startsWith("/api"))
     return await handleAPIRequest(req, res, params, {
       buckets,
     });
-
-  if (req.url === "/")
-    return resp(res, 200, process.env.WELCOME_MESSAGE ?? "LittleTinyStorage");
 
   const bucket = getURLParam(req?.url ?? "", 1);
   if (!bucket) return resp(res, 400, "Bucket was not found in URL.");
