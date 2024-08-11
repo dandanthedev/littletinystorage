@@ -86,13 +86,14 @@ export const streamFile = (
   const bucketPath = path.join(dataDir, safeBucket);
   const filePath = path.join(bucketPath, safeFile);
 
-  if (!fs.existsSync(filePath)) return null;
+  if (!fs.existsSync(filePath)) {
+    return null;
+  }
 
   const fileStats = getFileStats(bucket, file);
 
   if (!fileStats) {
-    if (res) return resp(res, 404);
-    else return null;
+    return null;
   }
 
   let start: string | number = 0;
@@ -117,7 +118,7 @@ export const streamFile = (
     }
 
     if (start >= fileStats.size || end >= fileStats.size) {
-      return resp(res, 416, "Invalid range");
+      return "Range not satisfiable";
     }
 
     res.writeHead(206, {

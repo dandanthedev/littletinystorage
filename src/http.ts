@@ -132,19 +132,20 @@ export const requestListener = async function (
         } else if (req.method === "GET") {
           const foundFile = streamFile(bucket, file, req, res);
           if (!foundFile) return resp(res, 404);
+          if (typeof foundFile === "string") return resp(res, 216, foundFile);
           return resp(res, undefined, foundFile, "file");
         } else return resp(res, 400, "Invalid method");
       }
     }
   }
 
+  if (req.url === "/")
+    return resp(res, 200, process.env.WELCOME_MESSAGE ?? "LittleTinyStorage");
+
   if (req?.url && req.url.startsWith("/api"))
     return await handleAPIRequest(req, res, params, {
       buckets,
     });
-
-  if (req.url === "/")
-    return resp(res, 200, process.env.WELCOME_MESSAGE ?? "LittleTinyStorage");
 
   const bucket = getURLParam(req?.url ?? "", 1);
   if (!bucket) return resp(res, 400, "Bucket was not found in URL.");
@@ -210,7 +211,9 @@ export const requestListener = async function (
 
     if (type === "download") {
       const foundFile = streamFile(bucket, file, req, res);
+
       if (!foundFile) return resp(res, 404);
+      if (typeof foundFile === "string") return resp(res, 216, foundFile);
 
       return resp(res, undefined, foundFile, "file");
     }

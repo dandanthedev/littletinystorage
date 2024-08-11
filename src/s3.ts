@@ -146,6 +146,9 @@ export const requestListener = async function (
 
     if (!sourceStream) return resp(res, 404, "SourceFileNotFound", "awsError");
 
+    if (typeof sourceStream === "string")
+      return resp(res, 400, sourceStream, "awsError");
+
     await pipeFileStream(bucket, file, sourceStream);
 
     return resp(
