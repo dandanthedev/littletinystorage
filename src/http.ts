@@ -219,11 +219,11 @@ export const requestListener = async function (
     }
     if (type === "upload") {
       await pipeFile(bucket, file, req);
-      return resp(res, 200);
+      return resp(res, 201);
     }
     if (type === "delete") {
       deleteFile(bucket, file);
-      return resp(res, 200);
+      return resp(res, 204);
     }
     if (type === "rename") {
       const newName = params.get("name");
@@ -246,7 +246,7 @@ export const requestListener = async function (
       const bucketToSet = newBucket ?? bucket;
 
       moveFile(bucket, file, bucketToSet, nameToSet);
-      return resp(res, 200);
+      return resp(res, 204);
     }
   }
 };
