@@ -33,7 +33,7 @@ export function resp(
     if (type === "json") res.setHeader("Content-Type", "application/json");
     if (type === "html") res.setHeader("Content-Type", "text/html");
     if (type === "xml") res.setHeader("Content-Type", "text/xml");
-  }
+  } else if (mimeType) res.setHeader("Content-Type", mimeType);
 
   if (!type) res.setHeader("Content-Type", "text/plain");
 

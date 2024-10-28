@@ -8,5 +8,6 @@ export default async function handle(
   resp: Function,
   extra: ExtraInfo
 ) {
-  return resp(res, 200, extra.buckets);
+  return resp(res, 200, extra.buckets, "json");
+  return;
 }
