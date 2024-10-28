@@ -27,7 +27,12 @@ export const requestListener = async function (
 
   if (fileName) {
     const file = fs.createReadStream(path.join("./web", fileName));
-    const mimeType = mime.default.getType(fileName);
+    let mimeType;
+    if (fileName.endsWith(".html")) mimeType = "text/html";
+    else if (fileName.endsWith(".css")) mimeType = "text/css";
+    else if (fileName.endsWith(".js")) mimeType = "text/javascript";
+    else if (fileName.endsWith(".png")) mimeType = "image/png";
+    else if (fileName.endsWith(".json")) mimeType = "application/json";
     return resp(res, 200, file, "file", mimeType ?? undefined);
   }
 };
