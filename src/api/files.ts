@@ -13,10 +13,10 @@ export default async function handle(
   if (!stats) {
     const files = getFiles(extra.bucket);
 
-    return resp(res, 200, files);
+    return resp(res, 200, files, "json");
   } else {
     const files = getFilesAndStats(extra.bucket);
 
-    return resp(res, 200, files);
+    return resp(res, 200, files, "json");
   }
 }
